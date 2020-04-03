@@ -1,27 +1,29 @@
-<<<<<<< HEAD
-/target/
-=======
-# Compiled class file
-*.class
+# Eclipse #
+/.project
+/.settings
+run.bat
 
-# Log file
-*.log
+# IntelliJ #
+*.iml
+*.ipr
+*.iws
 
-# BlueJ files
-*.ctxt
+# NetBeans #
+/nbproject
 
-# Mobile Tools for Java (J2ME)
-.mtj.tmp/
+# Maven #
+/build.xml
+/target
+run.bat
 
-# Package Files #
-*.jar
-*.war
-*.nar
-*.ear
-*.zip
-*.tar.gz
-*.rar
+# Mac #
+.DS_Store
 
-# virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
-hs_err_pid*
->>>>>>> refs/remotes/origin/master
+# Vim #
+.*.sw[a-p]
+
+# Misc #
+/build
+/bin
+/dist
+/manifest.mf
