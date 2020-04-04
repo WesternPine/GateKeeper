@@ -4,8 +4,11 @@ import java.io.File;
 import java.util.HashSet;
 import java.util.Set;
 
+import dev.westernpine.gatekeeper.backend.Backend;
 import dev.westernpine.gatekeeper.configuration.ConfigValue;
 import dev.westernpine.gatekeeper.configuration.GateKeeperConfig;
+import dev.westernpine.gatekeeper.management.autoroles.AutoRoleManager;
+import dev.westernpine.gatekeeper.management.reactions.ReactionRoleManager;
 import lombok.Getter;
 import net.dv8tion.jda.api.requests.GatewayIntent;
 import net.dv8tion.jda.api.sharding.DefaultShardManagerBuilder;
@@ -55,6 +58,12 @@ public class GateKeeper {
 			}
 			
 			config = new GateKeeperConfig(args, filePath, "GateKeeperConfig.yml");
+			
+			Backend.initialize(true);
+			
+			if(!Backend.canConnect()) {
+				throw new Exception("Unable to connect to MySQL Database, shutting down.");
+			}
 
 			Set<GatewayIntent> intents = new HashSet<>();
 			Set<CacheFlag> flags = new HashSet<>();
@@ -66,6 +75,9 @@ public class GateKeeper {
 			builder.setMemberCachePolicy(MemberCachePolicy.ALL);
 //            builder.addEventListeners(new MessageListener());
 			manager = builder.build();
+			
+			AutoRoleManager.initialize();
+			ReactionRoleManager.initialize();
 
 			System.out.println("Bot Startup Completed!");
 		} catch (Exception e) {

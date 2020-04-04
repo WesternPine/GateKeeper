@@ -1,7 +1,5 @@
 package dev.westernpine.gatekeeper.backend;
 
-import java.util.Optional;
-
 import dev.westernpine.gatekeeper.GateKeeper;
 import dev.westernpine.gatekeeper.configuration.ConfigValue;
 import dev.westernpine.gatekeeper.configuration.GateKeeperConfig;
@@ -11,9 +9,9 @@ import proj.api.marble.builders.sql.SQLBuilder;
 
 public class Backend {
 	
-	private SQL sql;
+	private static SQL sql;
 	
-	public Backend(boolean debugMode) {
+	public static void initialize(boolean debugMode) {
 		GateKeeperConfig config = GateKeeper.getInstance().getConfig();
 		
 		SQLBuilder builder = SQL.getBuilder();
@@ -29,54 +27,18 @@ public class Backend {
 		sql.setDebugging(debugMode);
 	}
 	
-	public GuildBackend get(String guild) {
+	public static boolean canConnect() {
+		boolean canConnect = false;
+		sql.getConnection().open();
+		canConnect = sql.getConnection().isOpen();
+		sql.getConnection().close();
+		return canConnect;
+	}
+	
+	public static GuildBackend get(String guild) {
 		return new GuildBackend(sql, guild);
 	}
 	
-}
-
-class GuildBackend {
 	
-	private SQL sql;
-	private String guild;
-	
-	GuildBackend(SQL sql, String guild) {
-		this.sql = sql;
-		this.guild = guild;
-	}
-	
-	public boolean exists() {
-		return sql.tableExists(guild);
-	}
-	
-	public void createTable() {
-        sql.update("CREATE TABLE IF NOT EXISTS `" + guild + "` (`type` varchar(255) NOT NULL, `id` varchar(255) NOT NULL, PRIMARY KEY (type)) ENGINE=InnoDB DEFAULT CHARSET=latin1;");
-	}
-	
-	public void destroyTable() {
-		sql.update("DROP TABLE " + guild + ";");
-	}
-	
-	public void addEntry(String key, String value) {
-		sql.update("INSERT INTO `" + guild + "` VALUES(?,?);", key, value);
-	}
-	
-	public Optional<String> getEntryValue(String key) {
-		Optional<Object> returned = sql.query(rs -> {
-			try {
-				if(rs.next())
-					return rs.getString("id");
-			} catch (Exception e) {
-				if(sql.isDebugging())
-					e.printStackTrace();
-			}
-			return null;
-		}, "SELECT * FROM `" + guild + "` WHERE type=?;", key);
-		return returned.isPresent() ? Optional.of((String) returned.get()) : Optional.empty();
-	}
-	
-	public void dropEntry(String key) {
-		sql.update("DELETE FROM `" + guild + "` WHERE type=?;", key);
-	}
 	
 }

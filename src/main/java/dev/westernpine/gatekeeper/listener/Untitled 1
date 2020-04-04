@@ -1,0 +1,21 @@
+!rr #TaggedChannel <messageid> @TaggedRole
+ 
+ ^
+ React to message sent by bot - delete after 2 minutes
+ once reacted, delete message, and send confirmation message
+ 
+listeners for:
+ role deleteion - if reaction role got deleted, remove reactions from corrisponding messages
+ reaction removal - remove reaction if bot's reaction was removed
+ message deletion - if message was deleted for RR's yet to be assigned AND for RR's already assigned
+ guild removal - if bot was removed from guild
+ user join - assign roles user reacted to previously
+ channel deletion - if a text channel gets deleted, delete all message tracking too
+ 
+on loadup:
+ guilds - drop tables of non-existing guilds
+ text channel deletions
+ message deletions - check if any messages were deleted, filter accordingly
+ role deletions - check all message roles, if roles were deleted, remove reactions
+ reaction removal - if reaction was removed, remove accordingly
+ users reacted - apply all roles that users reacted to the messages
