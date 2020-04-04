@@ -1,4 +1,4 @@
-package dev.westernpine.gatekeeper.listener;
+package dev.westernpine.gatekeeper.listener.autorole;
 
 import java.util.Set;
 

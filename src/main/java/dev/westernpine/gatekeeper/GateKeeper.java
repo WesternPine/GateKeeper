@@ -10,7 +10,7 @@ import dev.westernpine.gatekeeper.backend.Backend;
 import dev.westernpine.gatekeeper.configuration.ConfigValue;
 import dev.westernpine.gatekeeper.configuration.GateKeeperConfig;
 import dev.westernpine.gatekeeper.listener.CommandListener;
-import dev.westernpine.gatekeeper.listener.UserJoinListener;
+import dev.westernpine.gatekeeper.listener.autorole.UserJoinListener;
 import dev.westernpine.gatekeeper.management.autoroles.AutoRoleManager;
 import dev.westernpine.gatekeeper.management.reactions.ReactionRoleManager;
 import lombok.Getter;
@@ -85,9 +85,17 @@ public class GateKeeper {
 			builder.enableCache(flags);
 			builder.setChunkingFilter(ChunkingFilter.ALL);
 			builder.setMemberCachePolicy(MemberCachePolicy.ALL);
+			
+			//common listeners
 			builder.addEventListeners(new CommandListener());
+			builder.addEventListeners(new CommandListener());
+			
+			//auto role listeners
 			builder.addEventListeners(new UserJoinListener());
-//          builder.addEventListeners(new MessageListener());
+			
+			//reaction role listeners
+			
+			//startup initializer
 			builder.addEventListeners(new ListenerAdapter() {
 				@Override
 				public void onReady(ReadyEvent event) {
@@ -96,12 +104,8 @@ public class GateKeeper {
 					ReactionRoleManager.initialize();
 				}
 			});
-			manager = builder.build();
 			
-			//initialize all backends, then the classes
-			Backend.initializeGuilds(manager.getGuilds());
-			AutoRoleManager.initialize();
-			ReactionRoleManager.initialize();
+			manager = builder.build();
 
 			System.out.println("Bot Startup Completed!");
 		} catch (Exception e) {
