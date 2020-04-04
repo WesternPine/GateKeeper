@@ -9,7 +9,7 @@ import dev.westernpine.gatekeeper.GateKeeper;
 import dev.westernpine.gatekeeper.backend.Backend;
 import dev.westernpine.gatekeeper.backend.GuildBackend;
 import dev.westernpine.gatekeeper.object.GuildReactionMap;
-import lombok.Getter;
+import dev.westernpine.gatekeeper.object.NewReactionTask;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
@@ -18,6 +18,7 @@ import net.dv8tion.jda.api.entities.MessageReaction.ReactionEmote;
 import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.sharding.ShardManager;
+import proj.api.marble.lib.string.Strings;
 
 public class ReactionRoleManager {
 	
@@ -57,7 +58,7 @@ public class ReactionRoleManager {
 					Message msg = ch.getHistory().getMessageById(message);
 					if(msg != null) {
 						for(String reaction : map.getMap().get(channel).get(message).keySet()) {
-							ReactionEmote re = msg.getReactionById(reaction);
+							ReactionEmote re = Strings.isNumeric(reaction) ? msg.getReactionById(reaction) : msg.getReactionByUnicode(reaction);
 							if(re != null) {
 								roles.add(map.getMap().get(channel).get(message).get(reaction));
 							} else {
@@ -122,7 +123,7 @@ public class ReactionRoleManager {
 	 * All related to setting up a new reaction role
 	 */
 	
-	static Set<NewReactionTask> tasks = Collections.synchronizedSet(new HashSet<NewReactionTask>());
+	public static Set<NewReactionTask> tasks = Collections.synchronizedSet(new HashSet<NewReactionTask>());
 	
 	public static NewReactionTask getActiveReactionTask(String guild) {
 		for(NewReactionTask task : tasks) {
@@ -144,45 +145,11 @@ public class ReactionRoleManager {
 		return anyActive;
 	}
 	
-	public static void listenForNewReaction(String guild, String channel, String message) {
+	public static void listenForNewReaction(String guild, String currentChannel, String currentMessage, String creator, String taggedChannel, String messageId, String taggedRole) {
 		removeAvtiveReactionListener(guild);
-		NewReactionTask task = new NewReactionTask(guild, channel, message);
+		NewReactionTask task = new NewReactionTask(guild, currentChannel, currentMessage, creator, taggedChannel, messageId, taggedRole);
 		tasks.add(task);
 		new Thread(task).run();
 	}
 
-}
-
-class NewReactionTask implements Runnable {
-	
-	@Getter
-	private String guild;
-	
-	@Getter
-	private String channel;
-	
-	@Getter
-	private String message;
-	
-	NewReactionTask(String guild, String channel, String message) {
-		this.channel = channel;
-		this.message = message;
-	}
-
-	@Override
-	public void run() {
-		try {
-			Thread.sleep(120000); //2 minutes
-			ReactionRoleManager.tasks.remove(this);
-		} catch (Exception e) {}
-	}
-	
-	public Thread getThread() {
-		return Thread.currentThread();
-	}
-	
-	public void destroy() {
-		getThread().interrupt();
-		ReactionRoleManager.tasks.remove(this);
-	}
 }

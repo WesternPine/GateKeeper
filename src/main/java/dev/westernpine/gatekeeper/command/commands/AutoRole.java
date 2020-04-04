@@ -75,7 +75,7 @@ public class AutoRole implements Command {
             for(String roleId : roleIds) {
                 sb.append("\n     - " + guild.getRoleById(roleId).getAsMention());
             }
-            EmbedBuilder embed = Messenger.getEmbedFrame(guild);
+            EmbedBuilder embed = Messenger.getEmbedFrame(guild.getId());
             embed.setDescription(sb);
             Messenger.sendEmbed(ch, embed.build());
         } else {

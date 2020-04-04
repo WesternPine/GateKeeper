@@ -11,6 +11,11 @@ import dev.westernpine.gatekeeper.configuration.ConfigValue;
 import dev.westernpine.gatekeeper.configuration.GateKeeperConfig;
 import dev.westernpine.gatekeeper.listener.CommandListener;
 import dev.westernpine.gatekeeper.listener.autorole.UserJoinListener;
+import dev.westernpine.gatekeeper.listener.reaction.ChannelDeletionListener;
+import dev.westernpine.gatekeeper.listener.reaction.GuildListener;
+import dev.westernpine.gatekeeper.listener.reaction.MessageDeletionListener;
+import dev.westernpine.gatekeeper.listener.reaction.ReactionAppliedListener;
+import dev.westernpine.gatekeeper.listener.reaction.ReactionDeletionListener;
 import dev.westernpine.gatekeeper.management.autoroles.AutoRoleManager;
 import dev.westernpine.gatekeeper.management.reactions.ReactionRoleManager;
 import lombok.Getter;
@@ -94,6 +99,11 @@ public class GateKeeper {
 			builder.addEventListeners(new UserJoinListener());
 			
 			//reaction role listeners
+			builder.addEventListeners(new ChannelDeletionListener());
+			builder.addEventListeners(new GuildListener());
+			builder.addEventListeners(new MessageDeletionListener());
+			builder.addEventListeners(new ReactionAppliedListener());
+			builder.addEventListeners(new ReactionDeletionListener());
 			
 			//startup initializer
 			builder.addEventListeners(new ListenerAdapter() {
