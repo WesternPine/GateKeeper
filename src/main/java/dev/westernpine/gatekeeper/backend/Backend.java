@@ -1,8 +1,11 @@
 package dev.westernpine.gatekeeper.backend;
 
+import java.util.Collection;
+
 import dev.westernpine.gatekeeper.GateKeeper;
 import dev.westernpine.gatekeeper.configuration.ConfigValue;
 import dev.westernpine.gatekeeper.configuration.GateKeeperConfig;
+import net.dv8tion.jda.api.entities.Guild;
 import proj.api.marble.builders.sql.DatabaseType;
 import proj.api.marble.builders.sql.SQL;
 import proj.api.marble.builders.sql.SQLBuilder;
@@ -25,6 +28,10 @@ public class Backend {
 		builder.setPassword(config.getValue(ConfigValue.SQL_PASSWORD));
 		sql = builder.build();
 		sql.setDebugging(debugMode);
+	}
+	
+	public static void initializeGuilds(Collection<Guild> guilds) {
+		guilds.forEach(guild -> get(guild.getId()).createTable());
 	}
 	
 	public static boolean canConnect() {

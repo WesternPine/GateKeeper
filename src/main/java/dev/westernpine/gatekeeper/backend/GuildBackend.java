@@ -34,7 +34,7 @@ public class GuildBackend {
 	}
 	
 	public void createTable() {
-        sql.update("CREATE TABLE IF NOT EXISTS `" + guild + "` (`type` varchar(255) NOT NULL, `id` varchar(65535) NOT NULL, PRIMARY KEY (type)) ENGINE=InnoDB DEFAULT CHARSET=latin1;");
+        sql.update("CREATE TABLE IF NOT EXISTS `" + guild + "` (`type` varchar(255) NOT NULL, `id` text NOT NULL, PRIMARY KEY (type)) ENGINE=InnoDB DEFAULT CHARSET=latin1;");
 	}
 	
 	public void dropTable() {

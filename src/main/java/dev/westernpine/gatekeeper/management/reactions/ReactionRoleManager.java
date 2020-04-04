@@ -24,9 +24,6 @@ public class ReactionRoleManager {
 	public static void initialize() {
 		ShardManager manager = GateKeeper.getInstance().getManager();
 		for(Guild guild : manager.getGuilds()) {
-			GuildBackend backend = Backend.get(guild.getId());
-			if(!backend.exists())
-				backend.createTable();
 			GuildReactionMap map = getGuildReactionMapFromBackend(guild.getId());
 			map = verifyAndSynchronize(map);
 			updateGuildReactionMapToBackend(map);
@@ -49,9 +46,6 @@ public class ReactionRoleManager {
 	public static GuildReactionMap verifyAndSynchronize(GuildReactionMap map) {
 		ShardManager manager = GateKeeper.getInstance().getManager();
 		Guild guild = manager.getGuildById(map.getGuild());
-		GuildBackend backend = Backend.get(guild.getId());
-		if(!backend.exists())
-			backend.createTable();
 		
 		Set<String> pathsToRemove = new HashSet<>();
 		Set<String> roles = new HashSet<>();

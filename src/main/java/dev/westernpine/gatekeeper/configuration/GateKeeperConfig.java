@@ -36,9 +36,11 @@ public class GateKeeperConfig {
         filterAdditions();
         
         for(String key : System.getenv().keySet()) {
-        	ConfigValue cv = ConfigValue.valueOf(key);
-            if(cv != null) 
-                variables.put(cv, System.getenv(key));
+        	try { 
+        		ConfigValue cv = ConfigValue.valueOf(key);
+                if(cv != null) 
+                    variables.put(cv, System.getenv(key));
+        	} catch (Exception e) {}
         }
         
         filterAdditions();
@@ -47,9 +49,7 @@ public class GateKeeperConfig {
         for(String var : toAdd) {
             variables.put(ConfigValue.valueOf(var), (String)config.get(var, "?"));
         }
-        config.save();
-        config = null;
-        toAdd = null;
+        config.save();        
     }
     
     public String getValue(ConfigValue value) {

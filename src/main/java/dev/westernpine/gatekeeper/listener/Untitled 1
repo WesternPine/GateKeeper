@@ -12,6 +12,9 @@ listeners for:
  user join - assign roles user reacted to previously
  channel deletion - if a text channel gets deleted, delete all message tracking too
  
+ - Guild Join - make backends
+ - Guild Leave - Drop Backends
+ 
 on loadup:
  guilds - drop tables of non-existing guilds
  text channel deletions

@@ -24,7 +24,11 @@ public enum UserType {
 	}
 	
 	public static UserType of(String string) {
-		return UserType.valueOf(string.toUpperCase());
+		UserType type = UserType.CLIENT;
+		try {
+			type = UserType.valueOf(string.toUpperCase());
+		} catch (Exception e) {}
+		return type;
 	}
 	
 	public static UserType of(Member member) {
