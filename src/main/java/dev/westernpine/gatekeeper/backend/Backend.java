@@ -34,6 +34,14 @@ public class Backend {
 		guilds.forEach(guild -> get(guild.getId()).createTable());
 	}
 	
+	public static void primeForShutdown() {
+		sql.getConnection().open();
+	}
+	
+	public static void finishShutdown() {
+		sql.getConnection().close();
+	}
+	
 	public static boolean canConnect() {
 		boolean canConnect = false;
 		sql.getConnection().open();

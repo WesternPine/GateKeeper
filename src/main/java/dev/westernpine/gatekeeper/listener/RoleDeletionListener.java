@@ -2,10 +2,12 @@ package dev.westernpine.gatekeeper.listener;
 
 import java.util.Set;
 
-import dev.westernpine.gatekeeper.management.autoroles.AutoRoleManager;
-import dev.westernpine.gatekeeper.management.reactions.ReactionRoleManager;
-import dev.westernpine.gatekeeper.object.GuildReactionMap;
+import dev.westernpine.gatekeeper.management.AutoRoleManager;
+import dev.westernpine.gatekeeper.management.GuildManager;
+import dev.westernpine.gatekeeper.management.Manager;
+import dev.westernpine.gatekeeper.management.ReactionRoleManager;
 import dev.westernpine.gatekeeper.object.UserType;
+import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.events.role.RoleDeleteEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 
@@ -15,17 +17,19 @@ public class RoleDeletionListener extends ListenerAdapter {
 	public void onRoleDelete(RoleDeleteEvent event) {
 		String guild = event.getGuild().getId();
 		
+		Manager manager = GuildManager.get(guild);
+		AutoRoleManager arManager = manager.getAutoRoleManager();
+		ReactionRoleManager rrManager = manager.getReactionRoleManager();
+		
 		//auto roles
 		for(UserType type : UserType.values()) {
-			Set<String> roles = AutoRoleManager.getAutoRoles(type, guild);
+			Set<String> roles = arManager.getAutoRoles(type);
 			roles.remove(event.getRole().getId());
-			AutoRoleManager.setAutoRoles(type, guild, roles);
+			arManager.setAutoRoles(type, roles);
 		}
 		
 		//reaction roles
-		GuildReactionMap map = ReactionRoleManager.getGuildReactionMapFromBackend(guild);
-		map.removeRole(event.getRole().getId());
-		ReactionRoleManager.updateGuildReactionMapToBackend(map);
+		rrManager.remove(event.getRole().getId(), Role.class);
 	}
 	
 }

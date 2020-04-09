@@ -1,7 +1,5 @@
 package dev.westernpine.gatekeeper.util;
 
-import dev.westernpine.gatekeeper.GateKeeper;
-import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.MessageEmbed;
@@ -10,14 +8,6 @@ import net.dv8tion.jda.api.entities.User;
 public class Messenger {
 
 	private static boolean debug = true;
-
-	public static EmbedBuilder getEmbedFrame(String guild) {
-		return new EmbedBuilder().setColor(GateKeeper.defColor(GateKeeper.getInstance().getManager().getGuildById(guild)));
-	}
-
-	public static EmbedBuilder getEmbedFrame() {
-		return new EmbedBuilder();
-	}
 
 	public static void clearDM(User user) {
 		User self = user.getJDA().getSelfUser();

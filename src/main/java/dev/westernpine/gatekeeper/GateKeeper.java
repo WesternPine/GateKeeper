@@ -3,21 +3,19 @@ package dev.westernpine.gatekeeper;
 import java.awt.Color;
 import java.io.File;
 import java.util.EnumSet;
-import java.util.HashSet;
-import java.util.Set;
 
 import dev.westernpine.gatekeeper.backend.Backend;
 import dev.westernpine.gatekeeper.configuration.ConfigValue;
 import dev.westernpine.gatekeeper.configuration.GateKeeperConfig;
 import dev.westernpine.gatekeeper.listener.CommandListener;
+import dev.westernpine.gatekeeper.listener.RoleDeletionListener;
 import dev.westernpine.gatekeeper.listener.autorole.UserJoinListener;
 import dev.westernpine.gatekeeper.listener.reaction.ChannelDeletionListener;
 import dev.westernpine.gatekeeper.listener.reaction.GuildListener;
 import dev.westernpine.gatekeeper.listener.reaction.MessageDeletionListener;
 import dev.westernpine.gatekeeper.listener.reaction.ReactionAppliedListener;
 import dev.westernpine.gatekeeper.listener.reaction.ReactionDeletionListener;
-import dev.westernpine.gatekeeper.management.autoroles.AutoRoleManager;
-import dev.westernpine.gatekeeper.management.reactions.ReactionRoleManager;
+import dev.westernpine.gatekeeper.management.GuildManager;
 import lombok.Getter;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.events.ReadyEvent;
@@ -46,12 +44,29 @@ public class GateKeeper {
 	private ShardManager manager;
 
 	public static void main(String[] args) {
+//		Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
+//			@Override
+//			public void run() {
+//				GateKeeper i = getInstance();
+//				if(i != null)
+//					i.shutdown();
+//			}
+//		}));
+		
 		new GateKeeper().init(args);
 	}
 
 	public static Color defColor(Guild guild) {
         return guild.getSelfMember().getColor();
     }
+	
+//	private void shutdown() {
+//		System.out.println("Bot shutting down, do not interrupt...");
+//		Backend.primeForShutdown();
+//		GuildManager.shutdown();
+//		Backend.finishShutdown();
+//		System.out.println("Shutdown completed.");
+//	}
 
 	private void init(String[] args) {
 		instance = this;
@@ -59,9 +74,12 @@ public class GateKeeper {
 		try {
 			logger = new LogWindow("GateKeeper", 800, 400);
 			logger.addLogListener(new ListenerClass());
+			System.out.println();
 		} catch (Exception e) {
 			System.out.println("Ignoring GUI implementation...");
 		}
+		
+		System.out.println("Starting discord api library (JDA)...");
 
 		try {
 			String filePath;
@@ -80,10 +98,13 @@ public class GateKeeper {
 			if (!Backend.canConnect())
 				throw new Exception("Unable to connect to MySQL Database, shutting down.");
 
-			Set<GatewayIntent> intents = new HashSet<>(EnumSet.of(GatewayIntent.DIRECT_MESSAGES,
-					GatewayIntent.GUILD_MEMBERS, GatewayIntent.GUILD_MESSAGE_REACTIONS, GatewayIntent.GUILD_MESSAGES,
-					GatewayIntent.GUILD_PRESENCES));
-			Set<CacheFlag> flags = new HashSet<>(EnumSet.of(CacheFlag.ACTIVITY, CacheFlag.MEMBER_OVERRIDES));
+//			Set<GatewayIntent> intents = new HashSet<>(EnumSet.of(GatewayIntent.DIRECT_MESSAGES,
+//					GatewayIntent.GUILD_MEMBERS, GatewayIntent.GUILD_MESSAGE_REACTIONS, GatewayIntent.GUILD_MESSAGES,
+//					GatewayIntent.GUILD_PRESENCES));
+//			Set<CacheFlag> flags = new HashSet<>(EnumSet.of(CacheFlag.ACTIVITY, CacheFlag.MEMBER_OVERRIDES));
+			
+			EnumSet<GatewayIntent> intents = EnumSet.of(GatewayIntent.GUILD_MEMBERS, GatewayIntent.values());
+        	EnumSet<CacheFlag> flags = EnumSet.of(CacheFlag.ACTIVITY, CacheFlag.values());
 
 			DefaultShardManagerBuilder builder = DefaultShardManagerBuilder.createLight(config.getValue(ConfigValue.DISCORD_TOKEN));
 			builder.enableIntents(intents);
@@ -93,7 +114,7 @@ public class GateKeeper {
 			
 			//common listeners
 			builder.addEventListeners(new CommandListener());
-			builder.addEventListeners(new CommandListener());
+			builder.addEventListeners(new RoleDeletionListener());
 			
 			//auto role listeners
 			builder.addEventListeners(new UserJoinListener());
@@ -109,15 +130,18 @@ public class GateKeeper {
 			builder.addEventListeners(new ListenerAdapter() {
 				@Override
 				public void onReady(ReadyEvent event) {
+					System.out.println("Ready event called, initializing...");
 					Backend.initializeGuilds(manager.getGuilds());
-					AutoRoleManager.initialize();
-					ReactionRoleManager.initialize();
+					GuildManager.initialize();
+					System.out.println("Initialization completed!");
+					System.out.println("Bot startup completed!");
 				}
 			});
 			
 			manager = builder.build();
 
-			System.out.println("Bot Startup Completed!");
+			System.out.println("Discord library started!");
+			System.out.println("Waiting for initialization...");
 		} catch (Exception e) {
 			e.printStackTrace();
 			System.out.println("There was a problem starting the bot. Please try again.");

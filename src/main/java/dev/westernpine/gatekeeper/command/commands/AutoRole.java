@@ -4,8 +4,8 @@ import java.util.List;
 import java.util.Set;
 
 import dev.westernpine.gatekeeper.command.Command;
-import dev.westernpine.gatekeeper.command.CommandExecutor;
-import dev.westernpine.gatekeeper.management.autoroles.AutoRoleManager;
+import dev.westernpine.gatekeeper.management.AutoRoleManager;
+import dev.westernpine.gatekeeper.management.GuildManager;
 import dev.westernpine.gatekeeper.object.Messages;
 import dev.westernpine.gatekeeper.object.UserType;
 import dev.westernpine.gatekeeper.util.Messenger;
@@ -40,20 +40,32 @@ public class AutoRole implements Command {
 
     @Override
     public void execute(Guild guild, User user, MessageChannel ch, Message msg, String command, String[] args) {
-        if(args.length == 0) {
-            Messenger.sendEmbed(ch, Messages.autoRoles(guild.getId()).build());
-        } else if(args.length >= 2) {
-            UserType userType = UserType.of(args[0]);
-            if(userType == null) {
-                CommandExecutor.INVALID_COMMAND.execute(guild, user, ch, msg, command, args);
-                return;
-            }
-            List<Role> rolesToModify = msg.getMentionedRoles();
+    	AutoRoleManager arManager = GuildManager.get(guild.getId()).getAutoRoleManager();
+    	if(args.length == 0) {
+    		Messenger.sendEmbed(ch, Messages.autoRoles(guild).build());
+    	} else if(args.length == 1) {
+    		UserType userType = null;
+    		try {userType = UserType.of(args[0]);} catch (Exception e) {}
+    		if(userType == null) {
+    			Messenger.sendEmbed(ch, Messages.invalidUserType().build());
+    			return;
+    		}
+    		Messenger.sendEmbed(ch, Messages.rolesApplied(guild, userType, arManager.getAutoRoles(userType)).build());
+    	} else if(args.length >= 2) {
+    		UserType userType = null;
+    		try {userType = UserType.of(args[0]);} catch (Exception e) {}
+    		if(userType == null) {
+    			Messenger.sendEmbed(ch, Messages.invalidUserType().build());
+    			return;
+    		}
+    		
+    		List<Role> rolesToModify = msg.getMentionedRoles();
             if(rolesToModify == null || rolesToModify.isEmpty()) {
-                CommandExecutor.INVALID_COMMAND.execute(guild, user, ch, msg, command, args);
+            	Messenger.sendEmbed(ch, Messages.noMentionedRoles().build());
                 return;
             }
-            Set<String> roleIds = AutoRoleManager.getAutoRoles(userType, guild.getId());
+            
+            Set<String> roleIds = arManager.getAutoRoles(userType);
             for(Role role : rolesToModify) {
                 if(roleIds.contains(role.getId())) {
                     roleIds.remove(role.getId());
@@ -61,11 +73,10 @@ public class AutoRole implements Command {
                     roleIds.add(role.getId());
                 }
             }
-            AutoRoleManager.setAutoRoles(userType, guild.getId(), roleIds);
-            Messenger.sendEmbed(ch, Messages.rolesApplied(guild.getId(), userType, roleIds).build());
-        } else {
-            CommandExecutor.INVALID_COMMAND.execute(guild, user, ch, msg, command, args);
-        }
+            arManager.setAutoRoles(userType, roleIds);
+            Messenger.sendEmbed(ch, Messages.rolesApplied(guild, userType, roleIds).build());
+    		
+    	}
     }
 
 }

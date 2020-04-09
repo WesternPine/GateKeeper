@@ -2,9 +2,10 @@ package dev.westernpine.gatekeeper.command;
 
 import dev.westernpine.gatekeeper.authenticator.Authenticator;
 import dev.westernpine.gatekeeper.command.commands.AutoRole;
-import dev.westernpine.gatekeeper.command.commands.InvalidCommand;
+import dev.westernpine.gatekeeper.command.commands.Help;
 import dev.westernpine.gatekeeper.command.commands.NA;
 import dev.westernpine.gatekeeper.command.commands.NoPermission;
+import dev.westernpine.gatekeeper.command.commands.ReactionRole;
 import lombok.Getter;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Message;
@@ -12,12 +13,17 @@ import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.User;
 
 public  enum CommandExecutor {
-    AutoRole("AutoRole", new AutoRole()),
-//    ClearChat("ClearChat", new ClearChat()),
 //    HELP("HELP", new Help()),
+    AutoRole("AutoRole", new AutoRole()),
+    AR("AR", new AutoRole()),
+
+    ReactionRole("ReactionRole", new ReactionRole()),
+    RR("RR", new ReactionRole()),
+    
+    HELP("HELP", new Help()),
+    
     NA("NA", new NA()),
     NP("NP", new NoPermission()),
-    INVALID_COMMAND("invalidCommand", new InvalidCommand()),
     ;
     
     @Getter

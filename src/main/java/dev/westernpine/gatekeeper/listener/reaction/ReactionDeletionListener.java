@@ -1,7 +1,8 @@
 package dev.westernpine.gatekeeper.listener.reaction;
 
-import dev.westernpine.gatekeeper.management.reactions.ReactionRoleManager;
-import dev.westernpine.gatekeeper.object.GuildReactionMap;
+import dev.westernpine.gatekeeper.management.GuildManager;
+import dev.westernpine.gatekeeper.management.ReactionRoleManager;
+import dev.westernpine.gatekeeper.util.ReactionUtil;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Role;
@@ -12,6 +13,8 @@ import net.dv8tion.jda.api.hooks.ListenerAdapter;
 
 public class ReactionDeletionListener extends ListenerAdapter {
 	
+	//remove role from person that reacted
+	
 	//Single emote removed
 	@Override
 	public void onGuildMessageReactionRemove(GuildMessageReactionRemoveEvent event) {
@@ -21,20 +24,16 @@ public class ReactionDeletionListener extends ListenerAdapter {
 		String userRemoved = member.getId();
 		String channel = event.getChannel().getId();
 		String message = event.getMessageId();
-		String reaction = event.getReactionEmote().isEmoji() ? event.getReactionEmote().getEmoji() : event.getReactionEmote().getId();
+		String reaction = ReactionUtil.getId(event.getReactionEmote());
+		
+		ReactionRoleManager rrManager = GuildManager.get(guild).getReactionRoleManager();
 		
 		if(!g.getSelfMember().getId().equals(userRemoved)) {
-			try {
-				String roleId = ReactionRoleManager.getGuildReactionMapFromBackend(guild).getMap().get(channel).get(message).get(reaction);
-				Role role = g.getRoleById(roleId);
-				g.removeRoleFromMember(member, role);
-			} catch (Exception e) {} 
-			//Dont worry about no value existing in map, or if role doesnt exist, or if you cant modify the users roles
-			//Thats why this trycatch is here ^
+			String roleId = rrManager.getRole(channel, message, reaction);
+			Role role = g.getRoleById(roleId);
+			g.removeRoleFromMember(member, role).queue();
 		} else {
-			GuildReactionMap map = ReactionRoleManager.getGuildReactionMapFromBackend(guild);
-			map.remove(channel, message, reaction);
-			ReactionRoleManager.updateGuildReactionMapToBackend(map);
+			rrManager.removeReaction(channel, message, reaction);
 		}
 		
 	}
@@ -45,10 +44,7 @@ public class ReactionDeletionListener extends ListenerAdapter {
 		String guild = event.getGuild().getId();
 		String channel = event.getChannel().getId();
 		String message = event.getMessageId();
-		
-		GuildReactionMap map = ReactionRoleManager.getGuildReactionMapFromBackend(guild);
-		map.remove(channel, message);
-		ReactionRoleManager.updateGuildReactionMapToBackend(map);
+		GuildManager.get(guild).getReactionRoleManager().removeMessage(channel, message);
 	}
 	
 	//All of a SINGLE emote was removed
@@ -57,11 +53,8 @@ public class ReactionDeletionListener extends ListenerAdapter {
 		String guild = event.getGuild().getId();
 		String channel = event.getChannel().getId();
 		String message = event.getMessageId();
-		String reaction = event.getReactionEmote().isEmoji() ? event.getReactionEmote().getEmoji() : event.getReactionEmote().getId();
-		
-		GuildReactionMap map = ReactionRoleManager.getGuildReactionMapFromBackend(guild);
-		map.remove(channel, message, reaction);
-		ReactionRoleManager.updateGuildReactionMapToBackend(map);
+		String reaction = ReactionUtil.getId(event.getReactionEmote());
+		GuildManager.get(guild).getReactionRoleManager().removeReaction(channel, message, reaction);
 	}
 
 }
