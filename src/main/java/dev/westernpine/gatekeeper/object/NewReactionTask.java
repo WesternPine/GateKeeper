@@ -30,8 +30,6 @@ public class NewReactionTask implements Runnable {
 	@Getter
 	private String taggedRole;
 	
-	//test cancel to see what is getting this thread.
-//	@Getter
 	@Setter
 	private Thread thread;
 	
@@ -54,14 +52,14 @@ public class NewReactionTask implements Runnable {
 	}
 
 	public void end(boolean sendExpiredMessage) {
-		thread.interrupt();
+		TextChannel ch = GateKeeper.getInstance().getManager().getGuildById(guild).getTextChannelById(currentChannel);
+		try {Messenger.delete(ch.retrieveMessageById(currentMessage).complete());} catch (Exception e) {}
 		if(sendExpiredMessage) {
 			GuildManager.get(guild).getReactionRoleManager().reactionTask = null;
-			TextChannel ch = GateKeeper.getInstance().getManager().getGuildById(guild).getTextChannelById(currentChannel);
-			try {
-				Messenger.delete(ch.retrieveMessageById(currentMessage).complete());
-			} catch (Exception e) {}
 			Messenger.sendEmbed(ch, Messages.reactionSetupExpired().build());
 		}
+		
+		//Call after deletion, otherwise message wont delete since same thread
+		thread.interrupt();
 	}
 }

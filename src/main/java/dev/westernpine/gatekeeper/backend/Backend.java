@@ -32,6 +32,14 @@ public class Backend {
 	
 	public static void initializeGuilds(Collection<Guild> guilds) {
 		guilds.forEach(guild -> get(guild.getId()).createTable());
+		A: for(String table : sql.getTables()) {
+			for(Guild guild : guilds) {
+				if(guild.getId().equals(table)) {
+					continue A;
+				}
+			}
+			get(table).dropTable();
+		}
 	}
 	
 	public static void primeForShutdown() {

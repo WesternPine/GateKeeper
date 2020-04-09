@@ -9,7 +9,12 @@ public class GuildManager {
 	private static HashMap<String, Manager> guildManagers = new HashMap<>();
 	
 	public static void initialize() {
-		GateKeeper.getInstance().getManager().getGuilds().forEach(guild -> guildManagers.put(guild.getId(), new Manager(guild.getId())));
+		GateKeeper.getInstance().getManager().getGuilds().forEach(guild -> {
+			//This acts as a catch-all for startup errors.
+			try {
+				guildManagers.put(guild.getId(), new Manager(guild.getId()));
+			} catch (Exception e) {}
+		});
 	}
 	
 	public static void shutdown() {

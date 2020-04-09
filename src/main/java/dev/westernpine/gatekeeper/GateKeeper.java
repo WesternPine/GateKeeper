@@ -3,6 +3,8 @@ package dev.westernpine.gatekeeper;
 import java.awt.Color;
 import java.io.File;
 import java.util.EnumSet;
+import java.util.HashSet;
+import java.util.Set;
 
 import dev.westernpine.gatekeeper.backend.Backend;
 import dev.westernpine.gatekeeper.configuration.ConfigValue;
@@ -98,13 +100,10 @@ public class GateKeeper {
 			if (!Backend.canConnect())
 				throw new Exception("Unable to connect to MySQL Database, shutting down.");
 
-//			Set<GatewayIntent> intents = new HashSet<>(EnumSet.of(GatewayIntent.DIRECT_MESSAGES,
-//					GatewayIntent.GUILD_MEMBERS, GatewayIntent.GUILD_MESSAGE_REACTIONS, GatewayIntent.GUILD_MESSAGES,
-//					GatewayIntent.GUILD_PRESENCES));
-//			Set<CacheFlag> flags = new HashSet<>(EnumSet.of(CacheFlag.ACTIVITY, CacheFlag.MEMBER_OVERRIDES));
-			
-			EnumSet<GatewayIntent> intents = EnumSet.of(GatewayIntent.GUILD_MEMBERS, GatewayIntent.values());
-        	EnumSet<CacheFlag> flags = EnumSet.of(CacheFlag.ACTIVITY, CacheFlag.values());
+			Set<GatewayIntent> intents = new HashSet<>(EnumSet.of(GatewayIntent.DIRECT_MESSAGES,
+					GatewayIntent.GUILD_MEMBERS, GatewayIntent.GUILD_MESSAGE_REACTIONS, GatewayIntent.GUILD_MESSAGES,
+					GatewayIntent.GUILD_PRESENCES, GatewayIntent.GUILD_EMOJIS));
+			Set<CacheFlag> flags = new HashSet<>(EnumSet.of(CacheFlag.ACTIVITY, CacheFlag.MEMBER_OVERRIDES, CacheFlag.EMOTE));
 
 			DefaultShardManagerBuilder builder = DefaultShardManagerBuilder.createLight(config.getValue(ConfigValue.DISCORD_TOKEN));
 			builder.enableIntents(intents);

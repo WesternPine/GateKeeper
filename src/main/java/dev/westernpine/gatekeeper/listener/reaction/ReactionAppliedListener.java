@@ -1,6 +1,8 @@
 package dev.westernpine.gatekeeper.listener.reaction;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import dev.westernpine.gatekeeper.GateKeeper;
 import dev.westernpine.gatekeeper.management.GuildManager;
@@ -9,6 +11,7 @@ import dev.westernpine.gatekeeper.object.Messages;
 import dev.westernpine.gatekeeper.object.NewReactionTask;
 import dev.westernpine.gatekeeper.util.Messenger;
 import dev.westernpine.gatekeeper.util.ReactionUtil;
+import dev.westernpine.gatekeeper.util.RoleUtils;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
@@ -32,37 +35,39 @@ public class ReactionAppliedListener extends ListenerAdapter {
 		String message = event.getMessageId();
 		String reaction = ReactionUtil.getId(event.getReactionEmote());
 
+		
 		ReactionRoleManager rrManager = GuildManager.get(guild).getReactionRoleManager();
-
-		// test to see if is a set up reaction
+		
+		if (!g.getSelfMember().getId().equals(userApplied)) {
+			String roleId = rrManager.getRole(channel, message, reaction);
+			if(roleId != null)
+				RoleUtils.applyRole(member, roleId);
+			//dont return in case it is a setup message reaction
+		}
+		
+		Set<Member> reactors = new HashSet<>();
 		NewReactionTask task = rrManager.reactionTask;
-		if (task != null && task.getCurrentChannel().equals(channel) && task.getCurrentMessage().equals(message)
-				&& task.getCreator().equals(userApplied)) {
+		
+		if(task != null && task.getCurrentChannel().equals(channel) && task.getCurrentMessage().equals(message) && task.getCreator().equals(userApplied)) {
 			boolean added = false;
-			String reason = "Unknown.";
+			String reason = "Unknown reason.";
 			try {
 				reason = "Role no longer exists.";
 				Role role = g.getRoleById(task.getTaggedRole());
 				role.getIdLong();
-
 				reason = "Unable to find message.";
 				Message msg = g.getTextChannelById(task.getTaggedChannel()).retrieveMessageById(task.getMessageId())
 						.complete();
 				msg.getIdLong();
-
 				reason = "My reaction already exists on the message.";
-				List<User> reactors = event.getReactionEmote().isEmote()
+				List<User> userReactors = event.getReactionEmote().isEmote()
 						? msg.retrieveReactionUsers(event.getReactionEmote().getEmote()).complete()
 						: msg.retrieveReactionUsers(event.getReactionEmote().getEmoji()).complete();
-				if (reactors.contains(g.getSelfMember().getUser()))
+				if (userReactors.contains(g.getSelfMember().getUser()))
 					throw new Exception();
-
-				if (event.getReactionEmote().isEmote()) {
-
-				} else {
-
-				}
-
+				
+				userReactors.forEach(user -> reactors.add(g.getMember(user)));
+				
 				reason = "Unable to apply reaction to the message.";
 				if (event.getReactionEmote().isEmoji()) {
 					msg.addReaction(event.getReactionEmote().getEmoji()).complete();
@@ -74,23 +79,17 @@ public class ReactionAppliedListener extends ListenerAdapter {
 						msg.addReaction(event.getReactionEmote().getEmote()).complete();
 					}
 				}
-
 				rrManager.set(task.getTaggedChannel(), msg.getId(), reaction, role.getId());
-				task.end(false);
-
 				added = true;
-			} catch (Exception e) {}
-
+			} catch (Exception e) {} finally { task.end(false); }
+			
+			
 			TextChannel ch = GateKeeper.getInstance().getManager().getGuildById(guild).getTextChannelById(channel);
-			Messenger.delete(ch.retrieveMessageById(message).complete());
 			Messenger.sendEmbed(ch, (added ? Messages.reactionRoleApplied().build()
 					: Messages.failedToApplyReactionRole(reason).build()));
-
-		} else {
-			if (!g.getSelfMember().getId().equals(userApplied)) {
-				String roleId = rrManager.getRole(channel, message, reaction);
-				Role role = g.getRoleById(roleId);
-				g.addRoleToMember(member, role).queue();
+			if(added) {
+				reactors.remove(g.getSelfMember());
+				RoleUtils.applyRole(reactors, task.getTaggedRole());
 			}
 		}
 	}

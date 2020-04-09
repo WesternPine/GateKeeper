@@ -1,8 +1,11 @@
 package dev.westernpine.gatekeeper.util;
 
+import java.util.List;
+
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.MessageEmbed;
+import net.dv8tion.jda.api.entities.PrivateChannel;
 import net.dv8tion.jda.api.entities.User;
 
 public class Messenger {
@@ -11,16 +14,13 @@ public class Messenger {
 
 	public static void clearDM(User user) {
 		User self = user.getJDA().getSelfUser();
-
-		user.openPrivateChannel().queue(channel -> {
-			channel.getIterableHistory().queue(message -> {
-				message.forEach(msg -> {
-					if (msg.getAuthor().getId().equals(self.getId())) {
-						msg.delete().queue();
-					}
-				});
-			});
-		});
+		PrivateChannel channel = user.openPrivateChannel().complete();
+		List<Message> messages = channel.getIterableHistory().complete();
+		for (Message message : messages) {
+			if (message.getAuthor().getId().equals(self.getId())) {
+				message.delete().complete();
+			}
+		}
 	}
 
 	public static void sendMessage(MessageChannel ch, String message) {

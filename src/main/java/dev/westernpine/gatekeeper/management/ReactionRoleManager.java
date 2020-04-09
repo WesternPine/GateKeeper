@@ -1,6 +1,7 @@
 package dev.westernpine.gatekeeper.management;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 
@@ -29,10 +30,15 @@ public class ReactionRoleManager {
 	
 	public NewReactionTask reactionTask;
 	
-	private HashMap<String, HashMap<String, HashMap<String, String>>> map = new HashMap<>();
+	private HashMap<String, HashMap<String, HashMap<String, String>>> map;
 	
 	ReactionRoleManager(String guild) {
 		this.guild = guild;
+		refresh();
+	}
+	
+	public void refresh() {
+		map = new HashMap<>();
 		Optional<String> optionalJson = Backend.get(guild).getEntryValue("reactions");
 		String jsonMap = optionalJson.isPresent() ? optionalJson.get() : "";
 		unpack(jsonMap);
@@ -44,7 +50,7 @@ public class ReactionRoleManager {
 	}
 	
 	//convert the json to the current map
-	public void unpack(String jsonMap) {
+	private void unpack(String jsonMap) {
 		if(Strings.resemblesNull(jsonMap))
 			return;
 		try {
@@ -73,14 +79,17 @@ public class ReactionRoleManager {
 	}
 	
 	//synchronize current map with whats in the server
-	public void synchronize() {
+	private void synchronize() {
 		Guild g = GateKeeper.getInstance().getManager().getGuildById(guild);
 		HashMap<String, HashMap<String, HashMap<String, String>>> channelMap = new HashMap<>(map);
 		for(String channel : channelMap.keySet()) {
 			TextChannel ch = g.getTextChannelById(channel);
 			if(ch != null) {
 				for(String message : channelMap.get(channel).keySet()) {
-					Message msg = ch.retrieveMessageById(message).complete();
+					Message msg = null;
+					try { msg = ch.retrieveMessageById(message).complete(); } catch (Exception e) {
+						e.printStackTrace();
+					}
 					if(msg != null) {
 						for(String reaction : channelMap.get(channel).get(message).keySet()) {
 							ReactionEmote re = ReactionUtil.getReaction(msg, reaction);
@@ -107,7 +116,7 @@ public class ReactionRoleManager {
 	}
 	
 	//apply roles from current map
-	public void applyRoles() {
+	private void applyRoles() {
 		Guild g = GateKeeper.getInstance().getManager().getGuildById(guild);
 		for(String channel : map.keySet()) {
 			for(String message : map.get(channel).keySet()) {
@@ -186,8 +195,8 @@ public class ReactionRoleManager {
 	
 	//not functioning
 	public void cleanEmptyMaps() {
-		for(String channel : getChannels()) {
-			for(String message : getMessages(channel)) {
+		for(String channel : new HashSet<>(getChannels())) {
+			for(String message : new HashSet<>(getMessages(channel))) {
 				if(map.get(channel).get(message).isEmpty()) {
 					map.get(channel).remove(message);
 				}

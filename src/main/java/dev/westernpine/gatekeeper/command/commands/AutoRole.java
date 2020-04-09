@@ -1,5 +1,6 @@
 package dev.westernpine.gatekeeper.command.commands;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -9,8 +10,10 @@ import dev.westernpine.gatekeeper.management.GuildManager;
 import dev.westernpine.gatekeeper.object.Messages;
 import dev.westernpine.gatekeeper.object.UserType;
 import dev.westernpine.gatekeeper.util.Messenger;
+import dev.westernpine.gatekeeper.util.RoleUtils;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Guild;
+import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.Role;
@@ -75,7 +78,14 @@ public class AutoRole implements Command {
             }
             arManager.setAutoRoles(userType, roleIds);
             Messenger.sendEmbed(ch, Messages.rolesApplied(guild, userType, roleIds).build());
-    		
+            
+            Set<Member> membersToModify = new HashSet<>();
+            for(Member member : guild.getMembers()) {
+            	if(UserType.of(member) == userType) {
+            		membersToModify.add(member);
+            	}
+            }
+            RoleUtils.applyRoles(membersToModify, roleIds);
     	}
     }
 

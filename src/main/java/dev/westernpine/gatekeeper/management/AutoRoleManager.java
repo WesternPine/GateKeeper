@@ -1,5 +1,6 @@
 package dev.westernpine.gatekeeper.management;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Optional;
@@ -9,8 +10,10 @@ import dev.westernpine.gatekeeper.GateKeeper;
 import dev.westernpine.gatekeeper.backend.Backend;
 import dev.westernpine.gatekeeper.backend.GuildBackend;
 import dev.westernpine.gatekeeper.object.UserType;
+import dev.westernpine.gatekeeper.util.RoleUtils;
 import lombok.Getter;
 import net.dv8tion.jda.api.entities.Guild;
+import net.dv8tion.jda.api.entities.Member;
 import proj.api.marble.lib.string.Strings;
 
 public class AutoRoleManager {
@@ -28,7 +31,7 @@ public class AutoRoleManager {
 			Optional<String> value = Backend.get(guild).getEntryValue(userType.toString());
 			if(value.isPresent() && !Strings.resemblesNull(value.get())) {
 				if(value.get().contains(",")) {
-					for(String role : value.get().split(","))
+					for(String role : value.get().split(", "))
 						roles.add(role);
 				} else {
 					roles.add(value.get());
@@ -36,9 +39,11 @@ public class AutoRoleManager {
 			}
 			autoRoles.put(userType, roles);
 		}
-		g.getMembers().forEach(member -> 
-			autoRoles.get(UserType.of(member)).forEach(role -> 
-				g.addRoleToMember(member, g.getRoleById(role)).queue()));
+		
+		HashMap<UserType, Set<Member>> memberTypes = new HashMap<>();
+		Arrays.asList(UserType.values()).forEach(userType -> memberTypes.put(userType, new HashSet<>()));
+		g.getMembers().forEach(member -> memberTypes.get(UserType.of(member)).add(member));
+		autoRoles.keySet().forEach(userType -> RoleUtils.applyRoles(memberTypes.get(userType), autoRoles.get(userType)));
 	}
 	
 	void shutdown() {
@@ -58,7 +63,7 @@ public class AutoRoleManager {
 		String compiled = "";
 		boolean first = true;
 		for(String role : autoRoles.get(userType)) {
-			compiled = (first ? role : role + "," + compiled);
+			compiled = (first ? role : role + ", " + compiled);
 			first = false;
 		}
 		GuildBackend backend = Backend.get(guild);

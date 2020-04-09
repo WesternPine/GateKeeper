@@ -38,7 +38,7 @@ public class GuildBackend {
 	}
 	
 	public void dropTable() {
-		sql.update("DROP TABLE " + guild + ";");
+		sql.update("DROP TABLE `" + guild + "`;");
 	}
 	
 	public void addEntry(String key, String value) {
