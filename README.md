@@ -1,5 +1,8 @@
 # GateKeeper
-add preview here
+
+[![Pulse](https://github.com/WesternPine/GateKeeper/blob/master/Gatekeeper.jpg?raw=true)](https://discordapp.com/api/oauth2/authorize?client_id=486363405020561428&permissions=268520512&scope=bot)
+
+^ [Click To Add Me!](https://discordapp.com/api/oauth2/authorize?client_id=486363405020561428&permissions=268520512&scope=bot)
 
 ## Introduction
 
@@ -44,7 +47,7 @@ Startup Arguments > System Environmental Variables > Configuration File (Automat
   - Starup Arguments:
   
 ```
-java -jar Steamy-X.jar -[Configuration Key] [Value] -[Configuration Key 2] [Value] (etc...)
+java -jar GateKeeper-X.jar -[Configuration Key] [Value] -[Configuration Key 2] [Value] (etc...)
 ```
 
   - Environmental Variables:
@@ -54,7 +57,8 @@ java -jar Steamy-X.jar -[Configuration Key] [Value] -[Configuration Key 2] [Valu
   - Configuration File:
   
 ```
-{[Configuration Key]: [Value],[Configuration Key]: [Value], (etc...)}
+[Configuration Key]: [Value]
+(etc.)
 ```
 
 ## Starting The Bot (finally!)
@@ -64,19 +68,7 @@ Start your bot in any of the 3 ways listed above, with the proper configuration 
 
 ## Usage
 
-Whether you made your own bot, or want to use the [pre-existing one (Click Here)](https://discordapp.com/api/oauth2/authorize?client_id=486363405020561428&permissions=32&scope=bot), Using the bot is the same.
-
-__Permissiable Abilities:__
-
-  - Those with "MANAGE_ROLES":
-    * Can set auto-roles for User and Bot account types upon joining a server.
-    * Can set up reaction-roles for messages, for role access upon reaction.
-
-__Commands:__
-
-  - AutoRole/AR [Client/Bot] [Tagged Roles To Toggle]
-  - ReactionRole/RR [TaggedChannel] [MessageID] [Role To Toggle]
-
+Whether you made your own bot, or want to use the [pre-existing one (Click Here)](https://discordapp.com/api/oauth2/authorize?client_id=486363405020561428&permissions=268520512&scope=bot), Using the bot is the same. Simply stick with the default permissions the bot needs (You can find these using the invite link), and run the help command (Found in the bot's status).
 
 And that's everything to know about Gatekeeper! If you have any other questions, comments, or concerns, feel free to contact me here on github or use my website in my profile. Thank you!
 
