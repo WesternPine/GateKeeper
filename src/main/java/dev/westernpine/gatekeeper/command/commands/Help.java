@@ -63,9 +63,9 @@ public class Help implements Command {
 		
 		embed.addField("", Emoji.Link.getValue() 
         		+ " [**Discord**](https://discord.gg/PDbnC8z)"
-        		+ " • [**Code**](https://github.com/WesternPine/Pulse)"
-                + " • [**Updates**](https://github.com/WesternPine/Pulse/commits/master)"
-                + " • [**Invite**](https://discordapp.com/api/oauth2/authorize?client_id=633025336292147222&permissions=3164160&scope=bot)",
+        		+ " • [**Code**](https://github.com/WesternPine/GateKeeper)"
+                + " • [**Updates**](https://github.com/WesternPine/GateKeeper/commits/master)"
+                + " • [**Invite**](https://discordapp.com/api/oauth2/authorize?client_id=486363405020561428&permissions=268520512&scope=bot)",
                 false);
         
         try {

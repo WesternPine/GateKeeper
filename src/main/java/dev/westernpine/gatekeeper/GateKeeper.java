@@ -19,6 +19,8 @@ import dev.westernpine.gatekeeper.listener.reaction.ReactionAppliedListener;
 import dev.westernpine.gatekeeper.listener.reaction.ReactionDeletionListener;
 import dev.westernpine.gatekeeper.management.GuildManager;
 import lombok.Getter;
+import net.dv8tion.jda.api.OnlineStatus;
+import net.dv8tion.jda.api.entities.Activity;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.events.ReadyEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
@@ -138,6 +140,8 @@ public class GateKeeper {
 			});
 			
 			manager = builder.build();
+			
+			manager.setPresence(OnlineStatus.ONLINE, Activity.watching("for \"" + getPrefix() + "help\""));
 
 			System.out.println("Discord library started!");
 			System.out.println("Waiting for initialization...");

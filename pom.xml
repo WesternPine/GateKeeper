@@ -14,10 +14,10 @@
 			<url>https://jcenter.bintray.com</url>
 		</repository>
 
-		<repository>
-			<id>jitpack.io</id>
-			<url>https://jitpack.io</url>
-		</repository>
+<!-- 		<repository> -->
+<!-- 			<id>jitpack.io</id> -->
+<!-- 			<url>https://jitpack.io</url> -->
+<!-- 		</repository> -->
 	</repositories>
 
 	<dependencies>
@@ -72,7 +72,7 @@
 						<manifest>
 							<addClasspath>true</addClasspath>
 							<classpathPrefix>lib/</classpathPrefix>
-							<mainClass>dev.westernpine.Steamy</mainClass>
+							<mainClass>dev.westernpine.gatekeeper.GateKeeper</mainClass>
 						</manifest>
 					</archive>
 				</configuration>
@@ -84,7 +84,7 @@
 				<configuration>
 					<archive>
 						<manifest>
-							<mainClass>dev.westernpine.Steamy</mainClass>
+							<mainClass>dev.westernpine.gatekeeper.GateKeeper</mainClass>
 						</manifest>
 					</archive>
 				</configuration>
