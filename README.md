@@ -1,8 +1,8 @@
 # GateKeeper
 
-[![Pulse](https://github.com/WesternPine/GateKeeper/blob/master/Gatekeeper.jpg?raw=true)](https://discordapp.com/api/oauth2/authorize?client_id=486363405020561428&permissions=268520512&scope=bot)
+[![Pulse](https://github.com/WesternPine/GateKeeper/blob/master/Gatekeeper.jpg?raw=true)](https://discordapp.com/api/oauth2/authorize?client_id=697959175845707816&permissions=268520512&scope=bot)
 
-^ [Click To Add Me!](https://discordapp.com/api/oauth2/authorize?client_id=486363405020561428&permissions=268520512&scope=bot)
+^ [Click To Add Me!](https://discordapp.com/api/oauth2/authorize?client_id=697959175845707816&permissions=268520512&scope=bot)
 
 ## Introduction
 
@@ -68,7 +68,7 @@ Start your bot in any of the 3 ways listed above, with the proper configuration 
 
 ## Usage
 
-Whether you made your own bot, or want to use the [pre-existing one (Click Here)](https://discordapp.com/api/oauth2/authorize?client_id=486363405020561428&permissions=268520512&scope=bot), Using the bot is the same. Simply stick with the default permissions the bot needs (You can find these using the invite link), and run the help command (Found in the bot's status).
+Whether you made your own bot, or want to use the [pre-existing one (Click Here)](https://discordapp.com/api/oauth2/authorize?client_id=697959175845707816&permissions=268520512&scope=bot), Using the bot is the same. Simply stick with the default permissions the bot needs (You can find these using the invite link), and run the help command (Found in the bot's status).
 
 And that's everything to know about Gatekeeper! If you have any other questions, comments, or concerns, feel free to contact me here on github or use my website in my profile. Thank you!
 
