@@ -52,8 +52,8 @@ public class Help implements Command {
             sb.append("\n • `AutoRole/AR` - Lists all auto-applied roles for every account type.").append("\n");
             sb.append("\n • `AutoRole/AR Bot/Client @TaggedRoles` - Toggles the auto-applied roles for the account type.").append("\n");
             sb.append("\n • `ReactionRole/RR #TaggedChannel MessageID @TaggedRole` - Creates a reaction on  the specified message with the tagged role.").append("\n");
-            sb.append("\n\n**Remember to set the bot's role, ABOVE the roles it will be offering. There will be NO ERROR MESSAGE to alert you of this.*").append("\n");
-            sb.append("\n**Please also note that for effeciency and saftey purposes, "
+            sb.append("\n\n*Remember to set the bot's role, ABOVE the roles it will be offering. There will be NO ERROR MESSAGE to alert you of this.*").append("\n");
+            sb.append("\n*Please also note that for effeciency and saftey purposes, "
             		+ "GateKeeper will ONLY remove a role if a user reaction is removed on a reaction role. "
             		+ "When a autorole or reactionrole is set up, all roles will be applied. "
             		+ "GateKeeper WILL NOT remove roles when a autorole or reactionrole is removed/reset. "
