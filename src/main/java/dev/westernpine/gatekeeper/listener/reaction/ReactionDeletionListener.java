@@ -30,8 +30,10 @@ public class ReactionDeletionListener extends ListenerAdapter {
 
 		if (!g.getSelfMember().getId().equals(userRemoved)) {
 			String roleId = rrManager.getRole(channel, message, reaction);
-			Role role = g.getRoleById(roleId);
-			g.removeRoleFromMember(member, role).queue();
+			if (roleId != null) {
+				Role role = g.getRoleById(roleId);
+				g.removeRoleFromMember(member, role).queue();
+			}
 		} else {
 			rrManager.removeReaction(channel, message, reaction);
 		}
