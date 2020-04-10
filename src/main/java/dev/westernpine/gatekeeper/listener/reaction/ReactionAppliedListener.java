@@ -35,20 +35,20 @@ public class ReactionAppliedListener extends ListenerAdapter {
 		String message = event.getMessageId();
 		String reaction = ReactionUtil.getId(event.getReactionEmote());
 
-		
 		ReactionRoleManager rrManager = GuildManager.get(guild).getReactionRoleManager();
-		
+
 		if (!g.getSelfMember().getId().equals(userApplied)) {
 			String roleId = rrManager.getRole(channel, message, reaction);
-			if(roleId != null)
+			if (roleId != null)
 				RoleUtils.applyRole(member, roleId);
-			//dont return in case it is a setup message reaction
+			// dont return in case it is a setup message reaction
 		}
-		
+
 		Set<Member> reactors = new HashSet<>();
 		NewReactionTask task = rrManager.reactionTask;
-		
-		if(task != null && task.getCurrentChannel().equals(channel) && task.getCurrentMessage().equals(message) && task.getCreator().equals(userApplied)) {
+
+		if (task != null && task.getCurrentChannel().equals(channel) && task.getCurrentMessage().equals(message)
+				&& task.getCreator().equals(userApplied)) {
 			boolean added = false;
 			String reason = "Unknown reason.";
 			try {
@@ -65,9 +65,9 @@ public class ReactionAppliedListener extends ListenerAdapter {
 						: msg.retrieveReactionUsers(event.getReactionEmote().getEmoji()).complete();
 				if (userReactors.contains(g.getSelfMember().getUser()))
 					throw new Exception();
-				
+
 				userReactors.forEach(user -> reactors.add(g.getMember(user)));
-				
+
 				reason = "Unable to apply reaction to the message.";
 				if (event.getReactionEmote().isEmoji()) {
 					msg.addReaction(event.getReactionEmote().getEmoji()).complete();
@@ -81,13 +81,15 @@ public class ReactionAppliedListener extends ListenerAdapter {
 				}
 				rrManager.set(task.getTaggedChannel(), msg.getId(), reaction, role.getId());
 				added = true;
-			} catch (Exception e) {} finally { task.end(false); }
-			
-			
+			} catch (Exception e) {
+			} finally {
+				task.end(false);
+			}
+
 			TextChannel ch = GateKeeper.getInstance().getManager().getGuildById(guild).getTextChannelById(channel);
 			Messenger.sendEmbed(ch, (added ? Messages.reactionRoleApplied().build()
 					: Messages.failedToApplyReactionRole(reason).build()));
-			if(added) {
+			if (added) {
 				reactors.remove(g.getSelfMember());
 				RoleUtils.applyRole(reactors, task.getTaggedRole());
 			}

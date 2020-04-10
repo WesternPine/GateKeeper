@@ -12,10 +12,10 @@ import net.dv8tion.jda.api.events.message.guild.react.GuildMessageReactionRemove
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 
 public class ReactionDeletionListener extends ListenerAdapter {
-	
-	//remove role from person that reacted
-	
-	//Single emote removed
+
+	// remove role from person that reacted
+
+	// Single emote removed
 	@Override
 	public void onGuildMessageReactionRemove(GuildMessageReactionRemoveEvent event) {
 		Guild g = event.getGuild();
@@ -25,31 +25,31 @@ public class ReactionDeletionListener extends ListenerAdapter {
 		String channel = event.getChannel().getId();
 		String message = event.getMessageId();
 		String reaction = ReactionUtil.getId(event.getReactionEmote());
-		
+
 		ReactionRoleManager rrManager = GuildManager.get(guild).getReactionRoleManager();
-		
-		if(!g.getSelfMember().getId().equals(userRemoved)) {
+
+		if (!g.getSelfMember().getId().equals(userRemoved)) {
 			String roleId = rrManager.getRole(channel, message, reaction);
 			Role role = g.getRoleById(roleId);
 			g.removeRoleFromMember(member, role).queue();
 		} else {
 			rrManager.removeReaction(channel, message, reaction);
 		}
-		
+
 	}
-	
-	//All of EVERY emote was removed
+
+	// All of EVERY emote was removed
 	@Override
-    public void onGuildMessageReactionRemoveAll(GuildMessageReactionRemoveAllEvent event) {
+	public void onGuildMessageReactionRemoveAll(GuildMessageReactionRemoveAllEvent event) {
 		String guild = event.getGuild().getId();
 		String channel = event.getChannel().getId();
 		String message = event.getMessageId();
 		GuildManager.get(guild).getReactionRoleManager().removeMessage(channel, message);
 	}
-	
-	//All of a SINGLE emote was removed
+
+	// All of a SINGLE emote was removed
 	@Override
-    public void onGuildMessageReactionRemoveEmote(GuildMessageReactionRemoveEmoteEvent event) {
+	public void onGuildMessageReactionRemoveEmote(GuildMessageReactionRemoveEmoteEvent event) {
 		String guild = event.getGuild().getId();
 		String channel = event.getChannel().getId();
 		String message = event.getMessageId();

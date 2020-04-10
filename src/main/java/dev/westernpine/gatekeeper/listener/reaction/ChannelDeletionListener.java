@@ -6,7 +6,7 @@ import net.dv8tion.jda.api.events.channel.text.TextChannelDeleteEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 
 public class ChannelDeletionListener extends ListenerAdapter {
-	
+
 	@Override
 	public void onTextChannelDelete(TextChannelDeleteEvent event) {
 		String guild = event.getGuild().getId();

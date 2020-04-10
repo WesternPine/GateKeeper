@@ -13,7 +13,7 @@ public class GuildListener extends ListenerAdapter {
 	public void onGuildJoin(GuildJoinEvent event) {
 		Backend.get(event.getGuild().getId()).createTable();
 	}
-	
+
 	@Override
 	public void onGuildLeave(GuildLeaveEvent event) {
 		Backend.get(event.getGuild().getId()).dropTable();

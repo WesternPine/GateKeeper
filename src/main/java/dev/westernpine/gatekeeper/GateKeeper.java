@@ -56,14 +56,14 @@ public class GateKeeper {
 //					i.shutdown();
 //			}
 //		}));
-		
+
 		new GateKeeper().init(args);
 	}
 
 	public static Color defColor(Guild guild) {
-        return guild.getSelfMember().getColor();
-    }
-	
+		return guild.getSelfMember().getColor();
+	}
+
 //	private void shutdown() {
 //		System.out.println("Bot shutting down, do not interrupt...");
 //		Backend.primeForShutdown();
@@ -82,52 +82,55 @@ public class GateKeeper {
 		} catch (Exception e) {
 			System.out.println("Ignoring GUI implementation...");
 		}
-		
+
 		System.out.println("Starting discord api library (JDA)...");
 
 		try {
 			String filePath;
 			try {
-				filePath = new File(GateKeeper.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath().toString()).getParent();
+				filePath = new File(GateKeeper.class.getProtectionDomain().getCodeSource().getLocation().toURI()
+						.getPath().toString()).getParent();
 			} catch (Exception e) {
 				e.printStackTrace();
 				System.out.println("Error getting file path, shutting down.");
 				return;
 			}
-			
+
 			config = new GateKeeperConfig(args, filePath, "GateKeeperConfig.yml");
-			
+
 			Backend.initialize(true);
-			
+
 			if (!Backend.canConnect())
 				throw new Exception("Unable to connect to MySQL Database, shutting down.");
 
 			Set<GatewayIntent> intents = new HashSet<>(EnumSet.of(GatewayIntent.DIRECT_MESSAGES,
 					GatewayIntent.GUILD_MEMBERS, GatewayIntent.GUILD_MESSAGE_REACTIONS, GatewayIntent.GUILD_MESSAGES,
 					GatewayIntent.GUILD_PRESENCES, GatewayIntent.GUILD_EMOJIS));
-			Set<CacheFlag> flags = new HashSet<>(EnumSet.of(CacheFlag.ACTIVITY, CacheFlag.MEMBER_OVERRIDES, CacheFlag.EMOTE));
+			Set<CacheFlag> flags = new HashSet<>(
+					EnumSet.of(CacheFlag.ACTIVITY, CacheFlag.MEMBER_OVERRIDES, CacheFlag.EMOTE));
 
-			DefaultShardManagerBuilder builder = DefaultShardManagerBuilder.createLight(config.getValue(ConfigValue.DISCORD_TOKEN));
+			DefaultShardManagerBuilder builder = DefaultShardManagerBuilder
+					.createLight(config.getValue(ConfigValue.DISCORD_TOKEN));
 			builder.enableIntents(intents);
 			builder.enableCache(flags);
 			builder.setChunkingFilter(ChunkingFilter.ALL);
 			builder.setMemberCachePolicy(MemberCachePolicy.ALL);
-			
-			//common listeners
+
+			// common listeners
 			builder.addEventListeners(new CommandListener());
 			builder.addEventListeners(new RoleDeletionListener());
-			
-			//auto role listeners
+
+			// auto role listeners
 			builder.addEventListeners(new UserJoinListener());
-			
-			//reaction role listeners
+
+			// reaction role listeners
 			builder.addEventListeners(new ChannelDeletionListener());
 			builder.addEventListeners(new GuildListener());
 			builder.addEventListeners(new MessageDeletionListener());
 			builder.addEventListeners(new ReactionAppliedListener());
 			builder.addEventListeners(new ReactionDeletionListener());
-			
-			//startup initializer
+
+			// startup initializer
 			builder.addEventListeners(new ListenerAdapter() {
 				@Override
 				public void onReady(ReadyEvent event) {
@@ -138,9 +141,9 @@ public class GateKeeper {
 					System.out.println("Bot startup completed!");
 				}
 			});
-			
+
 			manager = builder.build();
-			
+
 			manager.setPresence(OnlineStatus.ONLINE, Activity.watching("for \"" + getPrefix() + "help\""));
 
 			System.out.println("Discord library started!");

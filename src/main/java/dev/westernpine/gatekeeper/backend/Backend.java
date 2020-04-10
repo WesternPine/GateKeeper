@@ -11,12 +11,12 @@ import proj.api.marble.builders.sql.SQL;
 import proj.api.marble.builders.sql.SQLBuilder;
 
 public class Backend {
-	
+
 	private static SQL sql;
-	
+
 	public static void initialize(boolean debugMode) {
 		GateKeeperConfig config = GateKeeper.getInstance().getConfig();
-		
+
 		SQLBuilder builder = SQL.getBuilder();
 		builder.setUseSSL(false);
 		builder.setUseSSLSuffix(true);
@@ -29,27 +29,27 @@ public class Backend {
 		sql = builder.build();
 		sql.setDebugging(debugMode);
 	}
-	
+
 	public static void initializeGuilds(Collection<Guild> guilds) {
 		guilds.forEach(guild -> get(guild.getId()).createTable());
-		A: for(String table : sql.getTables()) {
-			for(Guild guild : guilds) {
-				if(guild.getId().equals(table)) {
+		A: for (String table : sql.getTables()) {
+			for (Guild guild : guilds) {
+				if (guild.getId().equals(table)) {
 					continue A;
 				}
 			}
 			get(table).dropTable();
 		}
 	}
-	
+
 	public static void primeForShutdown() {
 		sql.getConnection().open();
 	}
-	
+
 	public static void finishShutdown() {
 		sql.getConnection().close();
 	}
-	
+
 	public static boolean canConnect() {
 		boolean canConnect = false;
 		sql.getConnection().open();
@@ -57,11 +57,9 @@ public class Backend {
 		sql.getConnection().close();
 		return canConnect;
 	}
-	
+
 	public static GuildBackend get(String guild) {
 		return new GuildBackend(sql, guild);
 	}
-	
-	
-	
+
 }

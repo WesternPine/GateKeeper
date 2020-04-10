@@ -7,21 +7,22 @@ import net.dv8tion.jda.internal.utils.EncodingUtil;
 import proj.api.marble.lib.string.Strings;
 
 public class ReactionUtil {
-	
-	//PROBLEM AREA -> look in role manager #apply roles for detials
+
+	// PROBLEM AREA -> look in role manager #apply roles for detials
 	public static String getId(ReactionEmote reaction) {
 		return reaction.isEmote() ? reaction.getEmote().getId() : reaction.getAsCodepoints();
 	}
-	
+
 	public static ReactionEmote getReaction(Message message, String fromId) {
-		return Strings.isNumeric(fromId) ? getReactionEmoteIdFromEmoteId(message, fromId) : message.getReactionByUnicode(EncodingUtil.decodeCodepoint(fromId));
+		return Strings.isNumeric(fromId) ? getReactionEmoteIdFromEmoteId(message, fromId)
+				: message.getReactionByUnicode(EncodingUtil.decodeCodepoint(fromId));
 	}
-	
+
 	private static ReactionEmote getReactionEmoteIdFromEmoteId(Message message, String emoteId) {
-		for(MessageReaction mr : message.getReactions()) {
+		for (MessageReaction mr : message.getReactions()) {
 			ReactionEmote reactionEmote = mr.getReactionEmote();
-			if(reactionEmote.isEmote()) {
-				if(reactionEmote.getId().equals(emoteId)) {
+			if (reactionEmote.isEmote()) {
+				if (reactionEmote.getId().equals(emoteId)) {
 					return reactionEmote;
 				}
 			}
