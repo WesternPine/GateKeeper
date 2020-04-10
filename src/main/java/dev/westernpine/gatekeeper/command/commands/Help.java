@@ -65,7 +65,7 @@ public class Help implements Command {
         		+ " [**Discord**](https://discord.gg/PDbnC8z)"
         		+ " • [**Code**](https://github.com/WesternPine/GateKeeper)"
                 + " • [**Updates**](https://github.com/WesternPine/GateKeeper/commits/master)"
-                + " • [**Invite**](https://discordapp.com/api/oauth2/authorize?client_id=486363405020561428&permissions=268520512&scope=bot)",
+                + " • [**Invite**](https://discordapp.com/api/oauth2/authorize?client_id=697959175845707816&permissions=268520512&scope=bot)",
                 false);
         
         try {
