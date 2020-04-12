@@ -7,6 +7,7 @@ import java.util.Set;
 import dev.westernpine.gatekeeper.command.Command;
 import dev.westernpine.gatekeeper.management.AutoRoleManager;
 import dev.westernpine.gatekeeper.management.GuildManager;
+import dev.westernpine.gatekeeper.object.Action;
 import dev.westernpine.gatekeeper.object.Messages;
 import dev.westernpine.gatekeeper.object.UserType;
 import dev.westernpine.gatekeeper.util.Messenger;
@@ -91,7 +92,7 @@ public class AutoRole implements Command {
 					membersToModify.add(member);
 				}
 			}
-			RoleUtils.applyRoles(membersToModify, roleIds);
+			RoleUtils.applyRoleString(RoleUtils.toRoleString(roleIds), Action.ADD, membersToModify.toArray(new Member[membersToModify.size()]));
 		}
 	}
 

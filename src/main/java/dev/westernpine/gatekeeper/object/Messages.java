@@ -51,11 +51,6 @@ public class Messages {
 				.setDescription(Emoji.CrossMark.getValue() + " **No channel mentioned.**");
 	}
 
-	public static EmbedBuilder noMentionedRole() {
-		return getEmbedFrame().setColor(Color.RED)
-				.setDescription(Emoji.CrossMark.getValue() + " **No role mentioned.**");
-	}
-
 	public static EmbedBuilder noMentionedRoles() {
 		return getEmbedFrame().setColor(Color.RED)
 				.setDescription(Emoji.CrossMark.getValue() + " **No roles mentioned.**");
@@ -73,8 +68,9 @@ public class Messages {
 
 	public static EmbedBuilder invalidReactionCommandFormat() {
 		return getEmbedFrame().setColor(Color.RED).setDescription(
-				Emoji.CrossMark + " **Invalid command format. (\"" + GateKeeper.getInstance().getPrefix()
-						+ "reactionrole Add/Remove #TaggedChannel NumericMessageID @MentionedRole\")");
+				Emoji.CrossMark + " **Invalid command format.**"
+						+ "\n`" + GateKeeper.getInstance().getPrefix()
+						+ "reactionrole Add/Remove #ChannelMention NumericMessageID @MentionedRoles`");
 	}
 
 	/*

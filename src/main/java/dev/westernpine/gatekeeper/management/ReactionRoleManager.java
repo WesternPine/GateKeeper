@@ -1,5 +1,6 @@
 package dev.westernpine.gatekeeper.management;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Optional;
@@ -15,8 +16,10 @@ import dev.westernpine.gatekeeper.backend.GuildBackend;
 import dev.westernpine.gatekeeper.object.Action;
 import dev.westernpine.gatekeeper.object.NewReactionTask;
 import dev.westernpine.gatekeeper.util.ReactionUtil;
+import dev.westernpine.gatekeeper.util.RoleUtils;
 import lombok.Getter;
 import net.dv8tion.jda.api.entities.Guild;
+import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageReaction;
 import net.dv8tion.jda.api.entities.MessageReaction.ReactionEmote;
@@ -31,7 +34,8 @@ public class ReactionRoleManager {
 
 	public NewReactionTask reactionTask;
 
-	private HashMap<String, HashMap<String, HashMap<String, String>>> map;
+	//              channel         message        reaction        action   role
+	private HashMap<String, HashMap<String, HashMap<String, HashMap<Action, String>>>> map;
 
 	//for effeciency reasons, only apply roles on creation.
 	ReactionRoleManager(String guild) {
@@ -60,16 +64,21 @@ public class ReactionRoleManager {
 			for (Object ch : (JSONArray) parser.parse(jsonMap)) {
 				JSONObject jsonChannel = (JSONObject) ch;
 				String channel = (String) jsonChannel.get("channel");
-				HashMap<String, HashMap<String, String>> messageMap = new HashMap<>();
+				HashMap<String, HashMap<String, HashMap<Action, String>>> messageMap = new HashMap<>();
 				for (Object msg : (JSONArray) jsonChannel.get("messages")) {
 					JSONObject jsonMessage = (JSONObject) msg;
 					String message = (String) jsonMessage.get("message");
-					HashMap<String, String> reactionMap = new HashMap<>();
+					HashMap<String, HashMap<Action, String>> reactionMap = new HashMap<>();
 					for (Object re : (JSONArray) jsonMessage.get("reactions")) {
 						JSONObject jsonReaction = (JSONObject) re;
 						String reaction = (String) jsonReaction.get("reaction");
-						String role = (String) jsonReaction.get("role");
-						reactionMap.put(reaction, role);
+						
+						HashMap<Action, String> actionMap = new HashMap<>();
+						for(Action action : Action.values()) {
+							String roleString = (String) jsonReaction.get(action.getJsonLabel());
+							actionMap.put(action, roleString);
+						}
+						reactionMap.put(reaction, actionMap);
 					}
 					messageMap.put(message, reactionMap);
 				}
@@ -83,7 +92,7 @@ public class ReactionRoleManager {
 	// synchronize current map with whats in the server
 	private void synchronize() {
 		Guild g = GateKeeper.getInstance().getManager().getGuildById(guild);
-		HashMap<String, HashMap<String, HashMap<String, String>>> channelMap = new HashMap<>(map);
+		HashMap<String, HashMap<String, HashMap<String, HashMap<Action, String>>>> channelMap = new HashMap<>(map);
 		for (String channel : channelMap.keySet()) {
 			TextChannel ch = g.getTextChannelById(channel);
 			if (ch != null) {
@@ -97,8 +106,7 @@ public class ReactionRoleManager {
 					if (msg != null) {
 						for (String reaction : channelMap.get(channel).get(message).keySet()) {
 							ReactionEmote re = ReactionUtil.getReaction(msg, reaction);
-							if (re == null
-									|| g.getRoleById(channelMap.get(channel).get(message).get(reaction)) == null) {
+							if (re == null) {
 								/*
 								 * As we are looping through a duplicate map anyways, AND the #set method is
 								 * looping through duplicate maps, it's faster if we just remove the role
@@ -107,7 +115,27 @@ public class ReactionRoleManager {
 								 * just as fast.
 								 */
 								map.get(channel).get(message).remove(reaction);
+								continue;
 							}
+							
+							/*
+							 * Does not need to be updated after every change, as changes take place
+							 * outside of loop, and any value-setting applies for the whole action, and not
+							 * a single role value of the string.
+							 */
+							for(Action action : new HashSet<>(channelMap.get(channel).get(message).get(reaction).keySet())) {
+								Set<String> filteredMissingRoles = RoleUtils.filterMissingRoles(guild, map.get(channel).get(message).get(reaction).get(action));
+								if(filteredMissingRoles.isEmpty()) {
+									map.get(channel).get(message).get(reaction).remove(action);
+								} else {
+									map.get(channel).get(message).get(reaction).put(action, RoleUtils.toRoleString(filteredMissingRoles));
+								}
+							}
+							
+							if(map.get(channel).get(message).get(reaction).isEmpty()) {
+								map.get(channel).get(message).remove(reaction);
+							}
+							
 						}
 					} else {
 						map.get(channel).remove(message);
@@ -125,17 +153,14 @@ public class ReactionRoleManager {
 		Guild g = GateKeeper.getInstance().getManager().getGuildById(guild);
 		for (String channel : map.keySet()) {
 			for (String message : map.get(channel).keySet()) {
-				g.getTextChannelById(channel).retrieveMessageById(message).queue(msg -> {
-					for (MessageReaction reaction : msg.getReactions()) {
-						String re = ReactionUtil.getId(reaction.getReactionEmote());
-						Role r = g.getRoleById(map.get(channel).get(message).get(re));
-						reaction.retrieveUsers().queue(users -> users.forEach(user -> {
-							if (!g.getSelfMember().getUser().getId().equals(user.getId())) {
-								g.addRoleToMember(user.getId(), r).queue();
-							}
-						}));
-					}
-				});
+				Message msg = g.getTextChannelById(channel).retrieveMessageById(message).complete();
+				for (MessageReaction reaction : msg.getReactions()) {
+					String re = ReactionUtil.getId(reaction.getReactionEmote());
+					Set<Member> reactors = new HashSet<>();
+					reaction.retrieveUsers().complete().forEach(user -> reactors.add(g.getMember(user)));
+					map.get(channel).get(message).get(re).keySet().forEach(action -> 
+						RoleUtils.applyRoleString(map.get(channel).get(message).get(re).get(action), action, reactors.toArray(new Member[reactors.size()])));
+				}
 			}
 		}
 	}
@@ -163,20 +188,26 @@ public class ReactionRoleManager {
 	public String toString() {
 		JSONArray channels = new JSONArray();
 		for (String channel : map.keySet()) {
-			HashMap<String, HashMap<String, String>> messageMap = map.get(channel);
+			HashMap<String, HashMap<String, HashMap<Action, String>>> messageMap = map.get(channel);
 			JSONObject jsonChannel = new JSONObject();
 			jsonChannel.put("channel", channel);
 			JSONArray channelMessages = new JSONArray();
 			for (String message : messageMap.keySet()) {
-				HashMap<String, String> reactionMap = messageMap.get(message);
+				HashMap<String, HashMap<Action, String>> reactionMap = messageMap.get(message);
 				JSONObject jsonMessage = new JSONObject();
 				jsonMessage.put("message", message);
 				JSONArray messageReactions = new JSONArray();
-				for (String reaction : reactionMap.keySet()) {
-					String role = reactionMap.get(reaction);
+				for(String reaction : reactionMap.keySet()) {
+					HashMap<Action, String> actionMap = reactionMap.get(reaction);
 					JSONObject jsonReaction = new JSONObject();
 					jsonReaction.put("reaction", reaction);
-					jsonReaction.put("role", role);
+					for(Action action : Action.values()) {
+						try {
+							jsonReaction.put(action.getJsonLabel(), actionMap.get(action));
+						} catch (Exception e) {
+							jsonReaction.put(action.getJsonLabel(), "");
+						}
+					}
 					messageReactions.add(jsonReaction);
 				}
 				jsonMessage.put("reactions", messageReactions);
@@ -185,16 +216,15 @@ public class ReactionRoleManager {
 			jsonChannel.put("messages", channelMessages);
 			channels.add(jsonChannel);
 		}
-
 		return channels.toJSONString();
 	}
 
 	public void listenForNewReaction(Action action, String currentChannel, String currentMessage, String creator, String taggedChannel,
-			String messageId, String taggedRole) {
+			String messageId, Collection<String> taggedRoles) {
 		if (reactionTask != null)
 			reactionTask.end(false);
 		reactionTask = new NewReactionTask(guild, action, currentChannel, currentMessage, creator, taggedChannel, messageId,
-				taggedRole);
+				taggedRoles);
 		Thread reactionTaskThread = new Thread(reactionTask);
 		reactionTask.setThread(reactionTaskThread);
 		reactionTaskThread.start();
@@ -202,8 +232,20 @@ public class ReactionRoleManager {
 
 	// not functioning
 	public void cleanEmptyMaps() {
-		for (String channel : new HashSet<>(getChannels())) {
-			for (String message : new HashSet<>(getMessages(channel))) {
+		for (String channel : getChannels()) {
+			for (String message : getMessages(channel)) {
+				for(String reaction : getReactions(channel, message)) {
+					for(Action action : getActions(channel, message, reaction)) {
+						Set<String> roles = RoleUtils.filterMissingRoles(guild, getRoleString(channel, message, reaction, action));
+						map.get(channel).get(message).get(reaction).put(action, RoleUtils.toRoleString(roles));
+						if(roles.isEmpty()) {
+							map.get(channel).get(message).get(reaction).remove(action);
+						}
+					}
+					if(map.get(channel).get(message).get(reaction).isEmpty()) {
+						map.get(channel).get(message).remove(reaction);
+					}
+				}
 				if (map.get(channel).get(message).isEmpty()) {
 					map.get(channel).remove(message);
 				}
@@ -214,17 +256,25 @@ public class ReactionRoleManager {
 		}
 	}
 
-	public String getRole(String channel, String message, String reaction) {
+	public String getRoleString(String channel, String message, String reaction, Action action) {
 		try {
-			return map.get(channel).get(message).get(reaction);
+			return map.get(channel).get(message).get(reaction).get(action);
 		} catch (Exception e) {
+		}
+		return null;
+	}
+	
+	public Set<Action> getActions(String channel, String message, String reaction) {
+		try {
+			return new HashSet<>(map.get(channel).get(message).get(reaction).keySet());
+		} catch(Exception e) {
 		}
 		return null;
 	}
 
 	public Set<String> getReactions(String channel, String message) {
 		try {
-			return map.get(channel).get(message).keySet();
+			return new HashSet<>(map.get(channel).get(message).keySet());
 		} catch (Exception e) {
 		}
 		return null;
@@ -232,7 +282,7 @@ public class ReactionRoleManager {
 
 	public Set<String> getMessages(String channel) {
 		try {
-			return map.get(channel).keySet();
+			return new HashSet<>(map.get(channel).keySet());
 		} catch (Exception e) {
 		}
 		return null;
@@ -240,7 +290,7 @@ public class ReactionRoleManager {
 
 	public Set<String> getChannels() {
 		try {
-			return map.keySet();
+			return new HashSet<>(map.keySet());
 		} catch (Exception e) {
 		}
 		return null;
@@ -250,14 +300,19 @@ public class ReactionRoleManager {
 		if (classTypeToRemove.isAssignableFrom(TextChannel.class)) {
 			map.remove(idToRemove);
 		} else if (classTypeToRemove.isAssignableFrom(Role.class)) {
-			HashMap<String, HashMap<String, HashMap<String, String>>> channelMap = new HashMap<>(map);
+			HashMap<String, HashMap<String, HashMap<String, HashMap<Action, String>>>> channelMap = new HashMap<>(map);
 			for (String ch : channelMap.keySet()) {
-				HashMap<String, HashMap<String, String>> messageMap = new HashMap<>(map.get(ch));
+				HashMap<String, HashMap<String, HashMap<Action, String>>> messageMap = new HashMap<>(map.get(ch));
 				for (String msg : messageMap.keySet()) {
-					HashMap<String, String> reactionMap = new HashMap<>(map.get(ch).get(msg));
+					HashMap<String, HashMap<Action, String>> reactionMap = new HashMap<>(map.get(ch).get(msg));
 					for (String re : reactionMap.keySet()) {
-						if (reactionMap.get(re).contains(idToRemove)) {
-							map.get(ch).get(msg).remove(re);
+						HashMap<Action, String> actionMap = new HashMap<>(map.get(ch).get(msg).get(re));
+						for(Action a : actionMap.keySet()) {
+							Set<String> roles = RoleUtils.toRoleSet(actionMap.get(a));
+							if(roles.contains(idToRemove)) {
+								roles.remove(idToRemove);
+								map.get(ch).get(msg).get(re).put(a, RoleUtils.toRoleString(roles));
+							}
 						}
 					}
 				}
@@ -284,14 +339,18 @@ public class ReactionRoleManager {
 		offload();
 	}
 
-	public void set(String channel, String message, String reaction, String role) {
-		HashMap<String, HashMap<String, String>> messageMap = map.get(channel);
+	public void set(String channel, String message, String reaction, Action action, String roleString) {
+		HashMap<String, HashMap<String, HashMap<Action, String>>> messageMap = map.get(channel);
 		if (messageMap == null)
 			messageMap = new HashMap<>();
-		HashMap<String, String> reactionMap = messageMap.get(message);
+		HashMap<String, HashMap<Action, String>> reactionMap = messageMap.get(message);
 		if (reactionMap == null)
 			reactionMap = new HashMap<>();
-		reactionMap.put(reaction, role);
+		HashMap<Action, String> actionMap = reactionMap.get(reaction);
+		if(actionMap == null)
+			actionMap = new HashMap<>();
+		actionMap.put(action, roleString);
+		reactionMap.put(reaction, actionMap);
 		messageMap.put(message, reactionMap);
 		map.put(channel, messageMap);
 		cleanEmptyMaps();

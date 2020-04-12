@@ -1,6 +1,8 @@
 package dev.westernpine.gatekeeper.command.commands;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import dev.westernpine.gatekeeper.command.Command;
 import dev.westernpine.gatekeeper.management.GuildManager;
@@ -43,7 +45,7 @@ public class ReactionRole implements Command {
 
 	@Override
 	public void execute(Guild guild, User user, MessageChannel ch, Message msg, String command, String[] args) {
-		if (args.length != 4) {
+		if (args.length < 4) {
 			Messenger.sendEmbed(ch, Messages.invalidReactionCommandFormat().build());
 		} else {
 			String action = args[0];
@@ -54,7 +56,7 @@ public class ReactionRole implements Command {
 			Action roleAction = Action.of(action);
 			TextChannel mentionedChannel = null;
 			Message mentionedMessage = null;
-			Role mentionedRole = null;
+			Set<String> mentionedRoles = new HashSet<>();
 			
 			if(roleAction == null) {
 				Messenger.sendEmbed(ch, Messages.unableToIdentifyAction().build());
@@ -87,12 +89,12 @@ public class ReactionRole implements Command {
 			}
 
 			if (role.startsWith("<@&") && role.endsWith(">")) {
-				List<Role> mentionedRoles = msg.getMentionedRoles();
-				if (mentionedRoles.isEmpty()) {
-					Messenger.sendEmbed(ch, Messages.noMentionedRole().build());
+				List<Role> mentRoles = msg.getMentionedRoles();
+				if (mentRoles.isEmpty()) {
+					Messenger.sendEmbed(ch, Messages.noMentionedRoles().build());
 					return;
 				}
-				mentionedRole = mentionedRoles.get(0);
+				mentRoles.forEach(r -> mentionedRoles.add(r.getId()));
 			} else {
 				Messenger.sendEmbed(ch, Messages.invalidReactionCommandFormat().build());
 				return;
@@ -101,7 +103,7 @@ public class ReactionRole implements Command {
 			Message sentMessage = ch.sendMessage(Messages.reactionRoleReactionRequiredMessage().build()).complete();
 			GuildManager.get(guild.getId()).getReactionRoleManager().listenForNewReaction(roleAction, ch.getId(),
 					sentMessage.getId(), user.getId(), mentionedChannel.getId(), mentionedMessage.getId(),
-					mentionedRole.getId());
+					mentionedRoles);
 		}
 	}
 

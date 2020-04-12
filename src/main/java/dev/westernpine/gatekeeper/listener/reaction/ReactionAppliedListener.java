@@ -7,6 +7,7 @@ import java.util.Set;
 import dev.westernpine.gatekeeper.GateKeeper;
 import dev.westernpine.gatekeeper.management.GuildManager;
 import dev.westernpine.gatekeeper.management.ReactionRoleManager;
+import dev.westernpine.gatekeeper.object.Action;
 import dev.westernpine.gatekeeper.object.Messages;
 import dev.westernpine.gatekeeper.object.NewReactionTask;
 import dev.westernpine.gatekeeper.util.Messenger;
@@ -36,35 +37,49 @@ public class ReactionAppliedListener extends ListenerAdapter {
 		String reaction = ReactionUtil.getId(event.getReactionEmote());
 
 		ReactionRoleManager rrManager = GuildManager.get(guild).getReactionRoleManager();
-
+		
 		if (!g.getSelfMember().getId().equals(userApplied)) {
-			String roleId = rrManager.getRole(channel, message, reaction);
-			if (roleId != null)
-				RoleUtils.applyRole(member, roleId);
+			for(Action action : Action.values()) {
+				String roleString = rrManager.getRoleString(channel, message, reaction, action);
+				RoleUtils.applyRoleString(roleString, action, member);
+			}
 			// dont return in case it is a setup message reaction
 		}
 
+		Set<String> activeRoleIds = new HashSet<>();
 		Set<Member> reactors = new HashSet<>();
 		NewReactionTask task = rrManager.reactionTask;
-
+		
 		if (task != null && task.getCurrentChannel().equals(channel) && task.getCurrentMessage().equals(message)
 				&& task.getCreator().equals(userApplied)) {
 			boolean added = false;
 			String reason = "Unknown reason.";
 			try {
-				reason = "Role no longer exists.";
-				Role role = g.getRoleById(task.getTaggedRole());
-				role.getIdLong();
+				reason = "One or more roles no longer exists.";
+				Set<String> roleIds = task.getTaggedRoles();
+				roleIds.forEach(roleId -> g.getRoleById(roleId).getIdLong());
+				
 				reason = "Unable to find message.";
-				Message msg = g.getTextChannelById(task.getTaggedChannel()).retrieveMessageById(task.getMessageId())
-						.complete();
+				Message msg = g.getTextChannelById(task.getTaggedChannel()).retrieveMessageById(task.getMessageId()).complete();
 				msg.getIdLong();
-				reason = "My reaction already exists on the message.";
+				
+				reason = "My reaction, with this action, with one of the roles, already exists.";
 				List<User> userReactors = event.getReactionEmote().isEmote()
 						? msg.retrieveReactionUsers(event.getReactionEmote().getEmote()).complete()
 						: msg.retrieveReactionUsers(event.getReactionEmote().getEmoji()).complete();
-				if (userReactors.contains(g.getSelfMember().getUser()))
-					throw new Exception();
+				if (userReactors.contains(g.getSelfMember().getUser())) {
+					String roleString = rrManager.getRoleString(task.getTaggedChannel(), task.getMessageId(), ReactionUtil.getId(event.getReactionEmote()), task.getAction());
+					activeRoleIds = RoleUtils.toRoleSet(roleString);
+					for(String roleId : activeRoleIds) {
+						if(roleIds.contains(roleId)) {
+							Role role = g.getRoleById(roleId);
+							reason = reason + "\nCommon Role Name: " + role.getName();
+							reason = reason + "\nCommon Role ID: " + roleId;
+							throw new Exception();
+						}
+					}
+				}
+					
 
 				userReactors.forEach(user -> reactors.add(g.getMember(user)));
 
@@ -79,7 +94,9 @@ public class ReactionAppliedListener extends ListenerAdapter {
 						msg.addReaction(event.getReactionEmote().getEmote()).complete();
 					}
 				}
-				rrManager.set(task.getTaggedChannel(), msg.getId(), reaction, role.getId());
+				
+				activeRoleIds.addAll(roleIds);
+				rrManager.set(task.getTaggedChannel(), msg.getId(), reaction, task.getAction(), RoleUtils.toRoleString(activeRoleIds));
 				added = true;
 			} catch (Exception e) {
 			} finally {
@@ -91,7 +108,7 @@ public class ReactionAppliedListener extends ListenerAdapter {
 					: Messages.failedToApplyReactionRole(reason).build()));
 			if (added) {
 				reactors.remove(g.getSelfMember());
-				RoleUtils.applyRole(reactors, task.getTaggedRole());
+				RoleUtils.applyRoleString(RoleUtils.toRoleString(activeRoleIds), task.getAction(), reactors.toArray(new Member[reactors.size()]));
 			}
 		}
 	}

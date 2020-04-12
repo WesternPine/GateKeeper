@@ -1,5 +1,9 @@
 package dev.westernpine.gatekeeper.object;
 
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
+
 import dev.westernpine.gatekeeper.GateKeeper;
 import dev.westernpine.gatekeeper.management.GuildManager;
 import dev.westernpine.gatekeeper.util.Messenger;
@@ -31,13 +35,13 @@ public class NewReactionTask implements Runnable {
 	private String messageId;
 
 	@Getter
-	private String taggedRole;
+	private Set<String> taggedRoles;
 
 	@Setter
 	private Thread thread;
 
 	public NewReactionTask(String guild, Action action, String currentChannel, String currentMessage, String creator,
-			String taggedChannel, String messageId, String taggedRole) {
+			String taggedChannel, String messageId, Collection<String> taggedRoles) {
 		this.guild = guild;
 		this.action = action;
 		this.currentChannel = currentChannel;
@@ -45,7 +49,7 @@ public class NewReactionTask implements Runnable {
 		this.creator = creator;
 		this.taggedChannel = taggedChannel;
 		this.messageId = messageId;
-		this.taggedRole = taggedRole;
+		this.taggedRoles = new HashSet<>(taggedRoles);
 	}
 
 	@Override

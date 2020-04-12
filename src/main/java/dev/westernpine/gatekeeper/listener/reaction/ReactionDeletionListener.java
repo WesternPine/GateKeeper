@@ -2,10 +2,11 @@ package dev.westernpine.gatekeeper.listener.reaction;
 
 import dev.westernpine.gatekeeper.management.GuildManager;
 import dev.westernpine.gatekeeper.management.ReactionRoleManager;
+import dev.westernpine.gatekeeper.object.Action;
 import dev.westernpine.gatekeeper.util.ReactionUtil;
+import dev.westernpine.gatekeeper.util.RoleUtils;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
-import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.events.message.guild.react.GuildMessageReactionRemoveAllEvent;
 import net.dv8tion.jda.api.events.message.guild.react.GuildMessageReactionRemoveEmoteEvent;
 import net.dv8tion.jda.api.events.message.guild.react.GuildMessageReactionRemoveEvent;
@@ -29,10 +30,9 @@ public class ReactionDeletionListener extends ListenerAdapter {
 		ReactionRoleManager rrManager = GuildManager.get(guild).getReactionRoleManager();
 
 		if (!g.getSelfMember().getId().equals(userRemoved)) {
-			String roleId = rrManager.getRole(channel, message, reaction);
-			if (roleId != null) {
-				Role role = g.getRoleById(roleId);
-				g.removeRoleFromMember(member, role).queue();
+			for(Action action : Action.values()) {
+				String roleString = rrManager.getRoleString(channel, message, reaction, action);
+				RoleUtils.applyRoleString(roleString, action.getOpposite(), member);
 			}
 		} else {
 			rrManager.removeReaction(channel, message, reaction);

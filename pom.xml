@@ -4,7 +4,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>dev.westernpine</groupId>
 	<artifactId>GateKeeper</artifactId>
-	<version>6</version>
+	<version>7</version>
 	<name>GateKeeper</name>
 
 	<repositories>
@@ -14,10 +14,10 @@
 			<url>https://jcenter.bintray.com</url>
 		</repository>
 
-<!-- 		<repository> -->
-<!-- 			<id>jitpack.io</id> -->
-<!-- 			<url>https://jitpack.io</url> -->
-<!-- 		</repository> -->
+		<repository>
+			<id>jitpack.io</id>
+			<url>https://jitpack.io</url>
+		</repository>
 	</repositories>
 
 	<dependencies>
@@ -33,16 +33,10 @@
 			</exclusions>
 		</dependency>
 
-		<!-- <dependency> -->
-		<!-- <groupId>com.github.WesternPine</groupId> -->
-		<!-- <artifactId>Marble</artifactId> -->
-		<!-- <version>master-SNAPSHOT</version> -->
-		<!-- </dependency> -->
-
 		<dependency>
-			<groupId>proj.api</groupId>
+			<groupId>com.github.WesternPine</groupId>
 			<artifactId>Marble</artifactId>
-			<version>10</version>
+			<version>master-SNAPSHOT</version>
 		</dependency>
 
 		<dependency>
