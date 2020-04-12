@@ -63,19 +63,21 @@ public class ReactionAppliedListener extends ListenerAdapter {
 				Message msg = g.getTextChannelById(task.getTaggedChannel()).retrieveMessageById(task.getMessageId()).complete();
 				msg.getIdLong();
 				
-				reason = "My reaction, with this action, with one of the roles, already exists.";
+				reason = "A reaction role already exists with one of the roles.";
 				List<User> userReactors = event.getReactionEmote().isEmote()
 						? msg.retrieveReactionUsers(event.getReactionEmote().getEmote()).complete()
 						: msg.retrieveReactionUsers(event.getReactionEmote().getEmoji()).complete();
 				if (userReactors.contains(g.getSelfMember().getUser())) {
-					String roleString = rrManager.getRoleString(task.getTaggedChannel(), task.getMessageId(), ReactionUtil.getId(event.getReactionEmote()), task.getAction());
-					activeRoleIds = RoleUtils.toRoleSet(roleString);
-					for(String roleId : activeRoleIds) {
-						if(roleIds.contains(roleId)) {
-							Role role = g.getRoleById(roleId);
-							reason = reason + "\nCommon Role Name: " + role.getName();
-							reason = reason + "\nCommon Role ID: " + roleId;
-							throw new Exception();
+					for(Action action : Action.values()) {
+						String roleString = rrManager.getRoleString(task.getTaggedChannel(), task.getMessageId(), ReactionUtil.getId(event.getReactionEmote()), action);
+						activeRoleIds = RoleUtils.toRoleSet(roleString);
+						for(String roleId : activeRoleIds) {
+							if(roleIds.contains(roleId)) {
+								Role role = g.getRoleById(roleId);
+								reason = reason + "\nCommon Role Name: " + role.getName();
+								reason = reason + "\nCommon Role ID: " + roleId;
+								throw new Exception();
+							}
 						}
 					}
 				}
