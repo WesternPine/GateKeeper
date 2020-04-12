@@ -31,6 +31,11 @@ public class Messages {
 				.setDescription(Emoji.CrossMark.getValue() + " **Invalid user type. (\"bot\" or \"client\")**");
 	}
 
+	public static EmbedBuilder unableToIdentifyAction() {
+		return getEmbedFrame().setColor(Color.RED).setDescription(
+				Emoji.CrossMark.getValue() + " **Unable to identify the action. (\"Add\" or \"Remove\")**");
+	}
+
 	public static EmbedBuilder unableToFindMentionedMessage() {
 		return getEmbedFrame().setColor(Color.RED).setDescription(
 				Emoji.CrossMark.getValue() + " **Unable to find mentioned message in the mentioned channel.**");
@@ -69,7 +74,7 @@ public class Messages {
 	public static EmbedBuilder invalidReactionCommandFormat() {
 		return getEmbedFrame().setColor(Color.RED).setDescription(
 				Emoji.CrossMark + " **Invalid command format. (\"" + GateKeeper.getInstance().getPrefix()
-						+ "reactionrole #TaggedChannel NumericMessageID @MentionedRole\")");
+						+ "reactionrole Add/Remove #TaggedChannel NumericMessageID @MentionedRole\")");
 	}
 
 	/*

@@ -11,6 +11,9 @@ public class NewReactionTask implements Runnable {
 
 	@Getter
 	private String guild;
+	
+	@Getter
+	private Action action;
 
 	@Getter
 	private String currentChannel;
@@ -33,9 +36,10 @@ public class NewReactionTask implements Runnable {
 	@Setter
 	private Thread thread;
 
-	public NewReactionTask(String guild, String currentChannel, String currentMessage, String creator,
+	public NewReactionTask(String guild, Action action, String currentChannel, String currentMessage, String creator,
 			String taggedChannel, String messageId, String taggedRole) {
 		this.guild = guild;
+		this.action = action;
 		this.currentChannel = currentChannel;
 		this.currentMessage = currentMessage;
 		this.creator = creator;

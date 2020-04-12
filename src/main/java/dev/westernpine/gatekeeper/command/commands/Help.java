@@ -1,6 +1,5 @@
 package dev.westernpine.gatekeeper.command.commands;
 
-import dev.westernpine.gatekeeper.GateKeeper;
 import dev.westernpine.gatekeeper.command.Command;
 import dev.westernpine.gatekeeper.object.Messages;
 import dev.westernpine.gatekeeper.util.Messenger;
@@ -49,37 +48,26 @@ public class Help implements Command {
         } else {
         	String sbName = Emoji.Exclamation.getValue() + " Commands";
             StringBuilder sb = new StringBuilder();
-            sb.append("\n • `AutoRole/AR` - Lists all auto-applied roles for every account type.").append("\n");
-            sb.append("\n • `AutoRole/AR Bot/Client @TaggedRoles` - Toggles the auto-applied roles for the account type.").append("\n");
-            sb.append("\n • `ReactionRole/RR #TaggedChannel MessageID @TaggedRole` - Creates a reaction on  the specified message with the tagged role.").append("\n");
-            sb.append("\n\n*Remember to set the bot's role, ABOVE the roles it will be offering. There will be NO ERROR MESSAGE to alert you of this.*").append("\n");
-            sb.append("\n*Please also note that for effeciency and saftey purposes, "
-            		+ "GateKeeper will ONLY remove a role if a user reaction is removed on a reaction role. "
-            		+ "When a autorole or reactionrole is set up, all roles will be applied. "
-            		+ "GateKeeper WILL NOT remove roles when a autorole or reactionrole is removed/reset. "
-            		+ "Removing roles is the responsibility of the server administrator(s).*").append("\n");
-            sb.append("").append("\n");
+            sb.append("\n • **AutoRole/AR** *Lists all auto-applied roles for every account type.*");
+            sb.append("\n\n • **AutoRole/AR Bot/Client @TaggedRoles** *Toggles the auto-applied roles for the account type.*");
+            sb.append("\n\n • **ReactionRole/RR Add/Remove #TaggedChannel MessageID @TaggedRole** *Creates a reaction on  the specified message with the tagged role.*");
+            
             embed.addField(sbName, sb.toString(), false);
+            embed.addField("", "**Remember to set the bot's role, ABOVE the roles it will be offering. There will be NO ERROR MESSAGE to alert you of this.*", false);
+            embed.addField("", "**Role removal outside the bot's intended purpose, is the responsibility of the server administrator.*", false);
         }
 		
-		embed.addField("", Emoji.Link.getValue() 
-        		+ " [**Discord**](https://discord.gg/PDbnC8z)"
+		embed.addField(Emoji.Link.getValue() + " Links",
+				""
+        		+ " • [**Discord**](https://discord.gg/PDbnC8z)"
         		+ " • [**Code**](https://github.com/WesternPine/GateKeeper)"
                 + " • [**Updates**](https://github.com/WesternPine/GateKeeper/commits/master)"
-                + " • [**Invite**](https://discordapp.com/api/oauth2/authorize?client_id=697959175845707816&permissions=268520512&scope=bot)",
+                + " • [**Invite**](https://discordapp.com/api/oauth2/authorize?client_id=697959175845707816&permissions=268520512&scope=bot)"
+                + " • ",
                 false);
         
-        try {
-            User maker = GateKeeper.getInstance().getManager().getUserById("559027677017669661");
-            embed.setFooter(
-                    maker.getName() + " Powered!" + " (" + maker.getName() + "#" + maker.getDiscriminator() + ")",
-                    maker.getAvatarUrl());
-        } catch (Exception e) {
-//            e.printStackTrace();
-        	embed.setFooter("K3ttle Powered! (K3ttle#1000)",
-                    "https://cdn.discordapp.com/avatars/559027677017669661/19e88d66ad8249d7b043df831b346667.png?size=128");
-        }
-
+		embed.setFooter("Join the Discord above!", "https://cdn.discordapp.com/icons/651185146543996938/ad1d1ed7f46f8a8ab9f77e1798dad233.webp?size=128");
+		
         Messenger.clearDM(member.getUser());
         Messenger.sendEmbed(member.getUser(), embed.build());
 		

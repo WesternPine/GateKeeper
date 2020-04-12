@@ -12,6 +12,7 @@ import org.json.simple.parser.JSONParser;
 import dev.westernpine.gatekeeper.GateKeeper;
 import dev.westernpine.gatekeeper.backend.Backend;
 import dev.westernpine.gatekeeper.backend.GuildBackend;
+import dev.westernpine.gatekeeper.object.Action;
 import dev.westernpine.gatekeeper.object.NewReactionTask;
 import dev.westernpine.gatekeeper.util.ReactionUtil;
 import lombok.Getter;
@@ -32,9 +33,11 @@ public class ReactionRoleManager {
 
 	private HashMap<String, HashMap<String, HashMap<String, String>>> map;
 
+	//for effeciency reasons, only apply roles on creation.
 	ReactionRoleManager(String guild) {
 		this.guild = guild;
 		refresh();
+		applyRoles();
 	}
 
 	public void refresh() {
@@ -43,7 +46,6 @@ public class ReactionRoleManager {
 		String jsonMap = optionalJson.isPresent() ? optionalJson.get() : "";
 		unpack(jsonMap);
 		synchronize();
-		applyRoles();
 		String postSynchronizedJsonMap = toString();
 		if (!postSynchronizedJsonMap.equals(jsonMap))
 			offload(postSynchronizedJsonMap);
@@ -187,11 +189,11 @@ public class ReactionRoleManager {
 		return channels.toJSONString();
 	}
 
-	public void listenForNewReaction(String currentChannel, String currentMessage, String creator, String taggedChannel,
+	public void listenForNewReaction(Action action, String currentChannel, String currentMessage, String creator, String taggedChannel,
 			String messageId, String taggedRole) {
 		if (reactionTask != null)
 			reactionTask.end(false);
-		reactionTask = new NewReactionTask(guild, currentChannel, currentMessage, creator, taggedChannel, messageId,
+		reactionTask = new NewReactionTask(guild, action, currentChannel, currentMessage, creator, taggedChannel, messageId,
 				taggedRole);
 		Thread reactionTaskThread = new Thread(reactionTask);
 		reactionTask.setThread(reactionTaskThread);

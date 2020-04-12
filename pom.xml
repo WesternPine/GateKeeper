@@ -4,7 +4,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>dev.westernpine</groupId>
 	<artifactId>GateKeeper</artifactId>
-	<version>5</version>
+	<version>6</version>
 	<name>GateKeeper</name>
 
 	<repositories>

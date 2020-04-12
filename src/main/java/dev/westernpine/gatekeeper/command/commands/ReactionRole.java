@@ -4,6 +4,7 @@ import java.util.List;
 
 import dev.westernpine.gatekeeper.command.Command;
 import dev.westernpine.gatekeeper.management.GuildManager;
+import dev.westernpine.gatekeeper.object.Action;
 import dev.westernpine.gatekeeper.object.Messages;
 import dev.westernpine.gatekeeper.util.Messenger;
 import net.dv8tion.jda.api.Permission;
@@ -42,17 +43,24 @@ public class ReactionRole implements Command {
 
 	@Override
 	public void execute(Guild guild, User user, MessageChannel ch, Message msg, String command, String[] args) {
-		if (args.length != 3) {
+		if (args.length != 4) {
 			Messenger.sendEmbed(ch, Messages.invalidReactionCommandFormat().build());
 		} else {
-			String channel = args[0];
-			String message = args[1];
-			String role = args[2];
+			String action = args[0];
+			String channel = args[1];
+			String message = args[2];
+			String role = args[3];
 
+			Action roleAction = Action.of(action);
 			TextChannel mentionedChannel = null;
 			Message mentionedMessage = null;
 			Role mentionedRole = null;
-
+			
+			if(roleAction == null) {
+				Messenger.sendEmbed(ch, Messages.unableToIdentifyAction().build());
+				return;
+			}
+			
 			if (channel.startsWith("<#") && channel.endsWith(">")) {
 				List<TextChannel> mentionedChannels = msg.getMentionedChannels();
 				if (mentionedChannels.isEmpty()) {
@@ -91,7 +99,7 @@ public class ReactionRole implements Command {
 			}
 
 			Message sentMessage = ch.sendMessage(Messages.reactionRoleReactionRequiredMessage().build()).complete();
-			GuildManager.get(guild.getId()).getReactionRoleManager().listenForNewReaction(ch.getId(),
+			GuildManager.get(guild.getId()).getReactionRoleManager().listenForNewReaction(roleAction, ch.getId(),
 					sentMessage.getId(), user.getId(), mentionedChannel.getId(), mentionedMessage.getId(),
 					mentionedRole.getId());
 		}
