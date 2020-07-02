@@ -6,7 +6,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
-import proj.api.marble.builders.config.Config;
+import dev.westernpine.common.config.Config;
 
 public class GateKeeperConfig {
 

@@ -2,13 +2,13 @@ package dev.westernpine.gatekeeper.backend;
 
 import java.util.Collection;
 
+import dev.westernpine.common.sql.SQL;
+import dev.westernpine.common.sql.SQL.DatabaseType;
+import dev.westernpine.common.sql.SQL.SQLBuilder;
 import dev.westernpine.gatekeeper.GateKeeper;
 import dev.westernpine.gatekeeper.configuration.ConfigValue;
 import dev.westernpine.gatekeeper.configuration.GateKeeperConfig;
 import net.dv8tion.jda.api.entities.Guild;
-import proj.api.marble.builders.sql.DatabaseType;
-import proj.api.marble.builders.sql.SQL;
-import proj.api.marble.builders.sql.SQLBuilder;
 
 public class Backend {
 

@@ -10,6 +10,7 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 
+import dev.westernpine.common.strings.Strings;
 import dev.westernpine.gatekeeper.GateKeeper;
 import dev.westernpine.gatekeeper.backend.Backend;
 import dev.westernpine.gatekeeper.backend.GuildBackend;
@@ -25,7 +26,6 @@ import net.dv8tion.jda.api.entities.MessageReaction;
 import net.dv8tion.jda.api.entities.MessageReaction.ReactionEmote;
 import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.TextChannel;
-import proj.api.marble.lib.string.Strings;
 
 public class ReactionRoleManager {
 
@@ -35,6 +35,7 @@ public class ReactionRoleManager {
 	public NewReactionTask reactionTask;
 
 	//              channel         message        reaction        action   role
+	@Getter
 	private HashMap<String, HashMap<String, HashMap<String, HashMap<Action, String>>>> map;
 
 	//for effeciency reasons, only apply roles on creation.
@@ -89,61 +90,60 @@ public class ReactionRoleManager {
 		}
 	}
 
+	//TODO: redo
+	
 	// synchronize current map with whats in the server
 	private void synchronize() {
 		Guild g = GateKeeper.getInstance().getManager().getGuildById(guild);
 		HashMap<String, HashMap<String, HashMap<String, HashMap<Action, String>>>> channelMap = new HashMap<>(map);
-		for (String channel : channelMap.keySet()) {
+		
+		for (String channel : new HashSet<>(channelMap.keySet())) {
 			TextChannel ch = g.getTextChannelById(channel);
 			if (ch != null) {
-				for (String message : channelMap.get(channel).keySet()) {
+				for (String message : new HashSet<>(channelMap.get(channel).keySet())) {
 					Message msg = null;
+					
 					try {
 						msg = ch.retrieveMessageById(message).complete();
 					} catch (Exception e) {
 						e.printStackTrace();
 					}
+					
 					if (msg != null) {
-						for (String reaction : channelMap.get(channel).get(message).keySet()) {
+						for (String reaction : new HashSet<>(channelMap.get(channel).get(message).keySet())) {
 							ReactionEmote re = ReactionUtil.getReaction(msg, reaction);
 							if (re == null) {
-								/*
-								 * As we are looping through a duplicate map anyways, AND the #set method is
-								 * looping through duplicate maps, it's faster if we just remove the role
-								 * straight from our cached map here. Additionally, the roles are cached in JDA,
-								 * so there wont be any connections or rate limiters to worry about, and will be
-								 * just as fast.
-								 */
 								map.get(channel).get(message).remove(reaction);
 								continue;
-							}
-							
-							/*
-							 * Does not need to be updated after every change, as changes take place
-							 * outside of loop, and any value-setting applies for the whole action, and not
-							 * a single role value of the string.
-							 */
-							for(Action action : new HashSet<>(channelMap.get(channel).get(message).get(reaction).keySet())) {
-								Set<String> filteredMissingRoles = RoleUtils.filterMissingRoles(guild, map.get(channel).get(message).get(reaction).get(action));
-								if(filteredMissingRoles.isEmpty()) {
-									map.get(channel).get(message).get(reaction).remove(action);
-								} else {
-									map.get(channel).get(message).get(reaction).put(action, RoleUtils.toRoleString(filteredMissingRoles));
+							} else {
+								/*
+								 * Does not need to be updated after every change, as changes take place
+								 * outside of loop, and any value-setting applies for the whole action, and not
+								 * a single role value of the string.
+								 */
+								for(Action action : new HashSet<>(channelMap.get(channel).get(message).get(reaction).keySet())) {
+									Set<String> filteredMissingRoles = RoleUtils.filterMissingRoles(guild, map.get(channel).get(message).get(reaction).get(action));
+									if(filteredMissingRoles.isEmpty()) {
+										map.get(channel).get(message).get(reaction).remove(action);
+									} else {
+										map.get(channel).get(message).get(reaction).put(action, RoleUtils.toRoleString(filteredMissingRoles));
+									}
+								}
+								
+								if(map.get(channel).get(message).get(reaction).isEmpty()) {
+									map.get(channel).get(message).remove(reaction);
 								}
 							}
-							
-							if(map.get(channel).get(message).get(reaction).isEmpty()) {
-								map.get(channel).get(message).remove(reaction);
-							}
-							
 						}
-					} else {
-						map.get(channel).remove(message);
 					}
+					
+					if(msg == null || map.get(channel).get(message).isEmpty())
+						map.get(channel).remove(message);
 				}
-			} else {
+			} 
+			
+			if(ch == null || map.get(channel).isEmpty())
 				map.remove(channel);
-			}
 		}
 		cleanEmptyMaps();
 	}
@@ -151,15 +151,17 @@ public class ReactionRoleManager {
 	// apply roles from current map
 	private void applyRoles() {
 		Guild g = GateKeeper.getInstance().getManager().getGuildById(guild);
-		for (String channel : map.keySet()) {
-			for (String message : map.get(channel).keySet()) {
+		
+		for (String channel : new HashSet<>(map.keySet())) {
+			for (String message : new HashSet<>(map.get(channel).keySet())) {
 				Message msg = g.getTextChannelById(channel).retrieveMessageById(message).complete();
 				for (MessageReaction reaction : msg.getReactions()) {
 					String re = ReactionUtil.getId(reaction.getReactionEmote());
-					Set<Member> reactors = new HashSet<>();
-					reaction.retrieveUsers().complete().forEach(user -> reactors.add(g.getMember(user)));
-					map.get(channel).get(message).get(re).keySet().forEach(action -> 
-						RoleUtils.applyRoleString(map.get(channel).get(message).get(re).get(action), action, reactors.toArray(new Member[reactors.size()])));
+					if(map.get(channel).get(message).get(re) != null) { //if a reaction exists on a message that isnt in the database
+						Set<Member> reactors = new HashSet<>();
+						reaction.retrieveUsers().complete().forEach(user -> reactors.add(g.getMember(user)));
+						map.get(channel).get(message).get(re).keySet().forEach(action -> RoleUtils.applyRoleString(map.get(channel).get(message).get(re).get(action), action, reactors.toArray(new Member[reactors.size()])));
+					}
 				}
 			}
 		}
@@ -230,70 +232,34 @@ public class ReactionRoleManager {
 		reactionTaskThread.start();
 	}
 
-	// not functioning
 	public void cleanEmptyMaps() {
-		for (String channel : getChannels()) {
-			for (String message : getMessages(channel)) {
-				for(String reaction : getReactions(channel, message)) {
-					for(Action action : getActions(channel, message, reaction)) {
-						Set<String> roles = RoleUtils.filterMissingRoles(guild, getRoleString(channel, message, reaction, action));
+		for (String channel : new HashSet<>(map.keySet())) {
+			for (String message : new HashSet<>(map.get(channel).keySet())) {
+				for(String reaction : new HashSet<>(map.get(channel).get(message).keySet())) {
+					for(Action action : new HashSet<>(map.get(channel).get(message).get(reaction).keySet())) {
+						Set<String> roles = RoleUtils.filterMissingRoles(guild, map.get(channel).get(message).get(reaction).get(action));
 						map.get(channel).get(message).get(reaction).put(action, RoleUtils.toRoleString(roles));
-						if(roles.isEmpty()) {
+						if(roles.isEmpty() || roles == null) {
 							map.get(channel).get(message).get(reaction).remove(action);
 						}
 					}
-					if(map.get(channel).get(message).get(reaction).isEmpty()) {
+					HashMap<Action, String> toTest = map.get(channel).get(message).get(reaction);
+					if(toTest == null || toTest.isEmpty()) {
 						map.get(channel).get(message).remove(reaction);
 					}
 				}
-				if (map.get(channel).get(message).isEmpty()) {
+				
+				HashMap<String, HashMap<Action, String>> toTest = map.get(channel).get(message);
+				if(toTest == null || toTest.isEmpty()) {
 					map.get(channel).remove(message);
 				}
 			}
-			if (map.get(channel).isEmpty()) {
+			
+			HashMap<String, HashMap<String, HashMap<Action, String>>> toTest = map.get(channel);
+			if(toTest == null || toTest.isEmpty()) {
 				map.remove(channel);
 			}
 		}
-	}
-
-	public String getRoleString(String channel, String message, String reaction, Action action) {
-		try {
-			return map.get(channel).get(message).get(reaction).get(action);
-		} catch (Exception e) {
-		}
-		return null;
-	}
-	
-	public Set<Action> getActions(String channel, String message, String reaction) {
-		try {
-			return new HashSet<>(map.get(channel).get(message).get(reaction).keySet());
-		} catch(Exception e) {
-		}
-		return null;
-	}
-
-	public Set<String> getReactions(String channel, String message) {
-		try {
-			return new HashSet<>(map.get(channel).get(message).keySet());
-		} catch (Exception e) {
-		}
-		return null;
-	}
-
-	public Set<String> getMessages(String channel) {
-		try {
-			return new HashSet<>(map.get(channel).keySet());
-		} catch (Exception e) {
-		}
-		return null;
-	}
-
-	public Set<String> getChannels() {
-		try {
-			return new HashSet<>(map.keySet());
-		} catch (Exception e) {
-		}
-		return null;
 	}
 
 	public void remove(String idToRemove, Class<?> classTypeToRemove) {

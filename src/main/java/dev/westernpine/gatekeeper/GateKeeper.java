@@ -30,16 +30,11 @@ import net.dv8tion.jda.api.sharding.ShardManager;
 import net.dv8tion.jda.api.utils.ChunkingFilter;
 import net.dv8tion.jda.api.utils.MemberCachePolicy;
 import net.dv8tion.jda.api.utils.cache.CacheFlag;
-import proj.api.marble.tasks.logwindow.LogListener;
-import proj.api.marble.tasks.logwindow.LogWindow;
 
 public class GateKeeper {
 
 	@Getter
 	private static GateKeeper instance;
-
-	@Getter
-	private LogWindow logger;
 
 	@Getter
 	private GateKeeperConfig config;
@@ -48,15 +43,6 @@ public class GateKeeper {
 	private ShardManager manager;
 
 	public static void main(String[] args) {
-//		Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
-//			@Override
-//			public void run() {
-//				GateKeeper i = getInstance();
-//				if(i != null)
-//					i.shutdown();
-//			}
-//		}));
-
 		new GateKeeper().init(args);
 	}
 
@@ -64,24 +50,8 @@ public class GateKeeper {
 		return guild.getSelfMember().getColor();
 	}
 
-//	private void shutdown() {
-//		System.out.println("Bot shutting down, do not interrupt...");
-//		Backend.primeForShutdown();
-//		GuildManager.shutdown();
-//		Backend.finishShutdown();
-//		System.out.println("Shutdown completed.");
-//	}
-
 	private void init(String[] args) {
 		instance = this;
-
-		try {
-			logger = new LogWindow("GateKeeper", 800, 400);
-			logger.addLogListener(new ListenerClass());
-			System.out.println();
-		} catch (Exception e) {
-			System.out.println("Ignoring GUI implementation...");
-		}
 
 		System.out.println("Starting discord api library (JDA)...");
 
@@ -157,20 +127,6 @@ public class GateKeeper {
 
 	public String getPrefix() {
 		return config.getValue(ConfigValue.COMMAND_PREFIX);
-	}
-
-}
-
-class ListenerClass implements LogListener {
-
-	LogWindow logger = GateKeeper.getInstance().getLogger();
-
-	@Override
-	public void onLogInput(String input) {
-		logger.log("All bot interactions will now be in Discord. Nothing further to do here...");
-		logger.log("If you wish to get help using the bot, type \"" + GateKeeper.getInstance().getPrefix()
-				+ "help\" in the discord chat.");
-		logger.log("To stop the bot, simply close the close.");
 	}
 
 }

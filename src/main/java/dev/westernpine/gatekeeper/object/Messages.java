@@ -4,12 +4,12 @@ import java.awt.Color;
 import java.util.Collection;
 import java.util.Set;
 
+import dev.westernpine.common.emoji.Emoji;
+import dev.westernpine.common.strings.Strings;
 import dev.westernpine.gatekeeper.GateKeeper;
 import dev.westernpine.gatekeeper.management.GuildManager;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Guild;
-import proj.api.marble.lib.emoji.Emoji;
-import proj.api.marble.lib.string.Strings;
 
 public class Messages {
 

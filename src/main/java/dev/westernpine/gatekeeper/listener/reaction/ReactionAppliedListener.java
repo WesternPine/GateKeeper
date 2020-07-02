@@ -1,5 +1,6 @@
 package dev.westernpine.gatekeeper.listener.reaction;
 
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -39,10 +40,14 @@ public class ReactionAppliedListener extends ListenerAdapter {
 		ReactionRoleManager rrManager = GuildManager.get(guild).getReactionRoleManager();
 		
 		if (!g.getSelfMember().getId().equals(userApplied)) {
-			for(Action action : Action.values()) {
-				String roleString = rrManager.getRoleString(channel, message, reaction, action);
-				RoleUtils.applyRoleString(roleString, action, member);
-			}
+			
+			if(rrManager.getMap().containsKey(channel))
+				if(rrManager.getMap().get(channel).containsKey(message))
+					if(rrManager.getMap().get(channel).get(message).containsKey(reaction))
+						Arrays.asList(Action.values()).forEach(action -> {
+							if(rrManager.getMap().get(channel).get(message).get(reaction).containsKey(action))
+								RoleUtils.applyRoleString(rrManager.getMap().get(channel).get(message).get(reaction).get(action), action, member);
+						});
 			// dont return in case it is a setup message reaction
 		}
 
@@ -69,7 +74,7 @@ public class ReactionAppliedListener extends ListenerAdapter {
 						: msg.retrieveReactionUsers(event.getReactionEmote().getEmoji()).complete();
 				if (userReactors.contains(g.getSelfMember().getUser())) {
 					for(Action action : Action.values()) {
-						String roleString = rrManager.getRoleString(task.getTaggedChannel(), task.getMessageId(), ReactionUtil.getId(event.getReactionEmote()), action);
+						String roleString = rrManager.getMap().get(task.getTaggedChannel()).get(task.getMessageId()).get(ReactionUtil.getId(event.getReactionEmote())).get(action);
 						activeRoleIds = RoleUtils.toRoleSet(roleString);
 						for(String roleId : activeRoleIds) {
 							if(roleIds.contains(roleId)) {

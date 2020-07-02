@@ -1,5 +1,6 @@
 package dev.westernpine.gatekeeper.command.commands;
 
+import dev.westernpine.common.emoji.Emoji;
 import dev.westernpine.gatekeeper.command.Command;
 import dev.westernpine.gatekeeper.object.Messages;
 import dev.westernpine.gatekeeper.util.Messenger;
@@ -10,7 +11,6 @@ import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.User;
-import proj.api.marble.lib.emoji.Emoji;
 
 public class Help implements Command {
 

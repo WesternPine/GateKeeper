@@ -4,12 +4,12 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
+import dev.westernpine.common.strings.Strings;
 import dev.westernpine.gatekeeper.GateKeeper;
 import dev.westernpine.gatekeeper.object.Action;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Role;
-import proj.api.marble.lib.string.Strings;
 
 public class RoleUtils {
 	

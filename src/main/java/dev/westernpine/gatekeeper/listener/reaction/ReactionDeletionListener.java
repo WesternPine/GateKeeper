@@ -1,5 +1,7 @@
 package dev.westernpine.gatekeeper.listener.reaction;
 
+import java.util.Arrays;
+
 import dev.westernpine.gatekeeper.management.GuildManager;
 import dev.westernpine.gatekeeper.management.ReactionRoleManager;
 import dev.westernpine.gatekeeper.object.Action;
@@ -30,10 +32,13 @@ public class ReactionDeletionListener extends ListenerAdapter {
 		ReactionRoleManager rrManager = GuildManager.get(guild).getReactionRoleManager();
 
 		if (!g.getSelfMember().getId().equals(userRemoved)) {
-			for(Action action : Action.values()) {
-				String roleString = rrManager.getRoleString(channel, message, reaction, action);
-				RoleUtils.applyRoleString(roleString, action.getOpposite(), member);
-			}
+			if(rrManager.getMap().containsKey(channel))
+				if(rrManager.getMap().get(channel).containsKey(message))
+					if(rrManager.getMap().get(channel).get(message).containsKey(reaction))
+						Arrays.asList(Action.values()).forEach(action -> {
+							if(rrManager.getMap().get(channel).get(message).get(reaction).containsKey(action))
+								RoleUtils.applyRoleString(rrManager.getMap().get(channel).get(message).get(reaction).get(action), action.getOpposite(), member);
+						});
 		} else {
 			rrManager.removeReaction(channel, message, reaction);
 		}

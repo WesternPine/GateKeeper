@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 
+import dev.westernpine.common.strings.Strings;
 import dev.westernpine.gatekeeper.GateKeeper;
 import dev.westernpine.gatekeeper.backend.Backend;
 import dev.westernpine.gatekeeper.backend.GuildBackend;
@@ -15,7 +16,6 @@ import dev.westernpine.gatekeeper.util.RoleUtils;
 import lombok.Getter;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
-import proj.api.marble.lib.string.Strings;
 
 public class AutoRoleManager {
 

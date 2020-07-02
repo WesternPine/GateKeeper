@@ -3,7 +3,7 @@ package dev.westernpine.gatekeeper.backend;
 import java.util.HashMap;
 import java.util.Optional;
 
-import proj.api.marble.builders.sql.SQL;
+import dev.westernpine.common.sql.SQL;
 
 public class GuildBackend {
 

@@ -1,10 +1,10 @@
 package dev.westernpine.gatekeeper.util;
 
+import dev.westernpine.common.strings.Strings;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageReaction;
 import net.dv8tion.jda.api.entities.MessageReaction.ReactionEmote;
 import net.dv8tion.jda.internal.utils.EncodingUtil;
-import proj.api.marble.lib.string.Strings;
 
 public class ReactionUtil {
 

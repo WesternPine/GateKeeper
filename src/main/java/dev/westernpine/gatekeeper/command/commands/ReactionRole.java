@@ -4,6 +4,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import dev.westernpine.common.strings.Strings;
 import dev.westernpine.gatekeeper.command.Command;
 import dev.westernpine.gatekeeper.management.GuildManager;
 import dev.westernpine.gatekeeper.object.Action;
@@ -16,7 +17,6 @@ import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.User;
-import proj.api.marble.lib.string.Strings;
 
 public class ReactionRole implements Command {
 
