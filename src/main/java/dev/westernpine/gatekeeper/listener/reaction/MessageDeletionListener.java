@@ -12,7 +12,6 @@ public class MessageDeletionListener extends ListenerAdapter {
 		String channel = event.getChannel().getId();
 		String message = event.getMessageId();
 		GuildManager.get(guild).getReactionRoleManager().removeMessage(channel, message);
-
 	}
 
 }

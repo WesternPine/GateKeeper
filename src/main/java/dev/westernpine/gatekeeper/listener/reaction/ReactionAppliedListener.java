@@ -46,7 +46,7 @@ public class ReactionAppliedListener extends ListenerAdapter {
 					if(rrManager.getMap().get(channel).get(message).containsKey(reaction))
 						Arrays.asList(Action.values()).forEach(action -> {
 							if(rrManager.getMap().get(channel).get(message).get(reaction).containsKey(action))
-								RoleUtils.applyRoleString(rrManager.getMap().get(channel).get(message).get(reaction).get(action), action, member);
+								RoleUtils.applyRoleString(rrManager.getMap().get(channel).get(message).get(reaction).get(action), action, guild, member);
 						});
 			// dont return in case it is a setup message reaction
 		}
@@ -115,7 +115,7 @@ public class ReactionAppliedListener extends ListenerAdapter {
 					: Messages.failedToApplyReactionRole(reason).build()));
 			if (added) {
 				reactors.remove(g.getSelfMember());
-				RoleUtils.applyRoleString(RoleUtils.toRoleString(activeRoleIds), task.getAction(), reactors.toArray(new Member[reactors.size()]));
+				RoleUtils.applyRoleString(RoleUtils.toRoleString(activeRoleIds), task.getAction(), guild, reactors.toArray(new Member[reactors.size()]));
 			}
 		}
 	}

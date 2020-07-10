@@ -92,7 +92,7 @@ public class AutoRole implements Command {
 					membersToModify.add(member);
 				}
 			}
-			RoleUtils.applyRoleString(RoleUtils.toRoleString(roleIds), Action.ADD, membersToModify.toArray(new Member[membersToModify.size()]));
+			RoleUtils.applyRoleString(RoleUtils.toRoleString(roleIds), Action.ADD, guild.getId(), membersToModify.toArray(new Member[membersToModify.size()]));
 		}
 	}
 

@@ -41,7 +41,7 @@ public class AutoRoleManager {
 		g.getMembers().forEach(member -> memberTypes.get(UserType.of(member)).add(member));
 		autoRoles.keySet().forEach(userType -> {
 			Set<Member> members = memberTypes.get(userType);
-			RoleUtils.applyRoleString(autoRoles.get(userType), Action.ADD, members.toArray(new Member[members.size()]));
+			RoleUtils.applyRoleString(autoRoles.get(userType), Action.ADD, guild, members.toArray(new Member[members.size()]));
 		});
 	}
 

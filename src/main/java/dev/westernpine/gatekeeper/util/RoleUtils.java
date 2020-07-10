@@ -13,15 +13,10 @@ import net.dv8tion.jda.api.entities.Role;
 
 public class RoleUtils {
 	
-	/*
-	 * Remove methods above
-	 * New Method
-	 */
-	
-	public static void applyRoleString(String roleString, Action action, Member...members) {
+	public static void applyRoleString(String roleString, Action action, String guildId, Member...members) {
 		if(members.length == 0)
 			return;
-		Guild guild = members[0].getGuild();
+		Guild guild = GateKeeper.getInstance().getManager().getGuildById(guildId);
 		Set<String> roles = new HashSet<>();
 		if(!Strings.resemblesNull(roleString)) {
 			if(!roleString.contains(", ")) {
@@ -43,11 +38,12 @@ public class RoleUtils {
 			//they reacted the first time. Meaning they have to double react, and the role isn't
 			//distributed to everyone on every statup.
 			for(Member member : members)
-				if(!guild.getSelfMember().getId().equals(member.getId()))
-					if(action == Action.ADD)
-						guild.addRoleToMember(member, role).queue();
-					else
-						guild.removeRoleFromMember(member, role).queue();
+				if(member != null)
+					if(!guild.getSelfMember().getId().equals(member.getId()))
+						if(action == Action.ADD)
+							guild.addRoleToMember(member, role).queue();
+						else
+							guild.removeRoleFromMember(member, role).queue();
 		});
 	}
 	

@@ -37,7 +37,7 @@ public class ReactionDeletionListener extends ListenerAdapter {
 					if(rrManager.getMap().get(channel).get(message).containsKey(reaction))
 						Arrays.asList(Action.values()).forEach(action -> {
 							if(rrManager.getMap().get(channel).get(message).get(reaction).containsKey(action))
-								RoleUtils.applyRoleString(rrManager.getMap().get(channel).get(message).get(reaction).get(action), action.getOpposite(), member);
+								RoleUtils.applyRoleString(rrManager.getMap().get(channel).get(message).get(reaction).get(action), action.getOpposite(), guild, member);
 						});
 		} else {
 			rrManager.removeReaction(channel, message, reaction);

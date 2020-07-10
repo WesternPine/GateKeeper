@@ -159,8 +159,8 @@ public class ReactionRoleManager {
 					String re = ReactionUtil.getId(reaction.getReactionEmote());
 					if(map.get(channel).get(message).get(re) != null) { //if a reaction exists on a message that isnt in the database
 						Set<Member> reactors = new HashSet<>();
-						reaction.retrieveUsers().complete().forEach(user -> reactors.add(g.getMember(user)));
-						map.get(channel).get(message).get(re).keySet().forEach(action -> RoleUtils.applyRoleString(map.get(channel).get(message).get(re).get(action), action, reactors.toArray(new Member[reactors.size()])));
+						reaction.retrieveUsers().complete().forEach(user -> Optional.ofNullable(g.getMember(user)).ifPresent(member -> reactors.add(member)));
+						map.get(channel).get(message).get(re).keySet().forEach(action -> RoleUtils.applyRoleString(map.get(channel).get(message).get(re).get(action), action, g.getId(), reactors.toArray(new Member[reactors.size()])));
 					}
 				}
 			}
